@@ -196,8 +196,8 @@ function LayerPanel({
 
       <p className="meta-line mt-7 text-[11px] leading-relaxed text-ink-mute">
         Click any pin to read its story. Real coordinates from the place
-        records — the surveyor's-paper canvas is a placeholder while we
-        wire georeferenced overlays.
+        records — the surveyor&apos;s-paper canvas is a placeholder while
+        we wire georeferenced overlays.
       </p>
     </div>
   );

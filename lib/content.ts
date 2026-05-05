@@ -146,7 +146,6 @@ function validateCrossReferences(index: ContentIndex): void {
     index[type].some((i) => i.slug === slug);
 
   const warn = (where: string, ref: string) => {
-    // eslint-disable-next-line no-console
     console.warn(`[content] dangling reference in ${where}: "${ref}" not found`);
   };
 
