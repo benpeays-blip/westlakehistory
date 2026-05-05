@@ -1,5 +1,5 @@
 /**
- * Zod schemas for the 8 content types in /content/.
+ * Zod schemas for the 9 content types in /content/.
  *
  * Schemas validate frontmatter only — the MDX body is loaded separately and
  * compiled by next-mdx-remote at render time. The build fails if any
@@ -8,6 +8,9 @@
  * Cross-references are slugs. After all content is loaded, lib/content.ts
  * runs a second pass to verify every referenced slug actually exists; missing
  * references log warnings and are dropped from the rendered links.
+ *
+ * Frontmatter shape mirrors the kickoff brief — entity links use plural slug
+ * arrays (people, places, stories, documents, audio, maps, collections).
  */
 
 import { z } from "zod";
@@ -22,6 +25,8 @@ const slug = z
     "must be kebab-case (lowercase letters, digits, hyphens)",
   );
 
+const slugList = z.array(slug).default([]);
+
 const isoDateLike = z
   .string()
   .regex(
@@ -29,110 +34,92 @@ const isoDateLike = z
     "must be YYYY, YYYY-MM, or YYYY-MM-DD",
   );
 
-const image = z.object({
-  src: z.string().min(1),
-  alt: z.string().min(1, "alt text is required for accessibility"),
-  caption: z.string().optional(),
-  credit: z.string().min(1, "image credit is required"),
-  year: z.number().int().optional(),
+const yearLike = z.union([z.number().int(), z.string().regex(/^\d{4}$/)]);
+
+const coordinates = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
 });
 
-const source = z.object({
-  type: z.enum([
-    "interview",
-    "newspaper",
-    "book",
-    "letter",
-    "deed",
-    "photo",
-    "podcast",
-    "video",
-    "meeting",
-    "personal",
-    "web",
-    "other",
-  ]),
-  citation: z.string().min(1),
-  url: z.url().optional(),
-});
-
-const rights = z.enum([
-  "public_domain",
-  "fair_use",
-  "permission_granted",
-  "research_only",
-]);
+// Shared cross-reference fields for entities that can cite/link other entities.
+const linkFields = {
+  stories: slugList,
+  people: slugList,
+  places: slugList,
+  documents: slugList,
+  audio: slugList,
+  maps: slugList,
+  eras: slugList,
+  collections: slugList,
+};
 
 // --- Story -----------------------------------------------------------------
 
 export const storySchema = z.object({
   title: z.string().min(1),
   slug,
-  chapter: z.number().int().optional(),       // Emmett's system; null for non-podcast
-  chapterTitle: z.string().optional(),
-  episode: z.number().int().optional(),
-  collection: slug.optional(),                // Umbrella: school, church, EHG, etc.
-  storyteller: slug,                          // Person slug
-  recordedDate: isoDateLike.optional(),
-  publishedDate: isoDateLike,
-  era: slug,                                  // Era slug
-  people: z.array(slug).default([]),          // Person slugs
-  places: z.array(slug).default([]),          // Place slugs
-  audio: slug.optional(),                     // Audio slug if there's a recording
-  video: slug.optional(),                     // Video collection ref (Phase 3)
-  hero: image.optional(),
-  excerpt: z.string().min(1).max(360),
-  sources: z.array(source).min(1, "every story needs at least one source"),
+  type: z.literal("story").optional(),
+  date: isoDateLike,
+  era: z.array(z.string()).default([]),    // human era labels (e.g. "1860s-1900s")
+  tags: z.array(z.string()).default([]),
+  summary: z.string().min(1).max(360),
+  heroImage: z.string().optional(),
+  heroCaption: z.string().optional(),
+  people: slugList,
+  places: slugList,
+  documents: slugList,
+  audio: slugList,
+  maps: slugList,
+  collections: slugList,
+  sourceNotes: z.array(z.string()).default([]),
+  featured: z.boolean().default(false),
+  byline: z.string().default("Westlake Historical Society"),
 });
 export type Story = z.infer<typeof storySchema>;
 
 // --- Person ----------------------------------------------------------------
 
 export const personSchema = z.object({
-  name: z.string().min(1),
+  title: z.string().min(1),                // person's display name
   slug,
-  born: isoDateLike.optional(),
-  died: isoDateLike.optional(),
+  type: z.literal("person").optional(),
+  birthDate: yearLike.optional(),
+  deathDate: yearLike.optional(),
+  summary: z.string().min(1).max(480),
+  portrait: z.string().optional(),
   roles: z.array(z.string()).default([]),
-  birthplace: z.string().optional(),
-  portrait: image.optional(),
-  relatedPeople: z.array(slug).default([]),
-  relatedPlaces: z.array(slug).default([]),
-  collection: slug.optional(),
-  sources: z.array(source).default([]),
+  ...linkFields,
 });
 export type Person = z.infer<typeof personSchema>;
 
 // --- Place -----------------------------------------------------------------
 
 export const placeSchema = z.object({
-  name: z.string().min(1),
+  title: z.string().min(1),
   slug,
+  type: z.literal("place").optional(),
+  placeType: z.string().min(1).describe("Ranch, Bridge, School, Church, Road, Subdivision..."),
+  locationLabel: z.string().optional(),
+  coordinates: coordinates.optional(),
+  yearBuilt: yearLike.optional(),
+  yearDemolished: yearLike.optional(),
+  status: z.enum(["extant", "demolished", "renamed", "unknown"]).default("unknown"),
   historicalNames: z.array(z.string()).default([]),
-  coordinates: z
-    .tuple([
-      z.number().min(-180).max(180), // lng
-      z.number().min(-90).max(90),   // lat
-    ])
-    .describe("[longitude, latitude]"),
-  yearBuilt: z.number().int().optional(),
-  yearDemolished: z.number().int().optional(),
-  status: z.enum(["extant", "demolished", "renamed", "unknown"]),
-  era: slug,
-  type: z.string().min(1).describe("ranch, lodge, bridge, road, school..."),
-  photos: z.array(image).default([]),
-  collection: slug.optional(),
-  sources: z.array(source).default([]),
+  summary: z.string().min(1).max(480),
+  ...linkFields,
 });
 export type Place = z.infer<typeof placeSchema>;
 
 // --- Era -------------------------------------------------------------------
 
 export const eraSchema = z.object({
-  name: z.string().min(1),
+  title: z.string().min(1),
   slug,
+  type: z.literal("era").optional(),
   yearStart: z.number().int(),
   yearEnd: z.number().int(),
+  summary: z.string().min(1).max(480),
+  ...linkFields,
 }).refine((e) => e.yearEnd >= e.yearStart, {
   message: "yearEnd must be ≥ yearStart",
   path: ["yearEnd"],
@@ -144,27 +131,15 @@ export type Era = z.infer<typeof eraSchema>;
 export const documentSchema = z.object({
   title: z.string().min(1),
   slug,
-  type: z.enum([
-    "deed",
-    "photo",
-    "letter",
-    "newspaper",
-    "map",
-    "ledger",
-    "program",
-    "yearbook",
-    "ephemera",
-    "other",
-  ]),
+  type: z.literal("document").optional(),
+  documentType: z.string().min(1).describe("Deed, Photo, Letter, Newspaper, Map, Ledger..."),
   date: isoDateLike.optional(),
-  source: z.string().min(1).describe("e.g. 'Shelton Family Collection'"),
-  donor: z.string().optional(),
-  scan: image,
-  rights,
-  relatedStories: z.array(slug).default([]),
-  relatedPeople: z.array(slug).default([]),
-  relatedPlaces: z.array(slug).default([]),
-  collection: slug.optional(),
+  creator: z.string().optional(),
+  source: z.string().min(1).describe("e.g. 'Deed Book 12, Page 45'"),
+  image: z.string().optional(),
+  transcription: z.string().optional().describe("path to transcription file"),
+  rights: z.string().min(1),
+  ...linkFields,
 });
 export type Document = z.infer<typeof documentSchema>;
 
@@ -173,19 +148,18 @@ export type Document = z.infer<typeof documentSchema>;
 export const audioSchema = z.object({
   title: z.string().min(1),
   slug,
-  source: z.enum(["podcast", "interview", "meeting"]),
+  type: z.literal("audio").optional(),
+  audioType: z.string().default("Oral History").describe("Oral History, Podcast, Interview..."),
+  interviewee: z.string().optional(),
+  interviewer: z.string().optional(),
+  date: isoDateLike,
+  duration: z.string().describe("MM:SS or HH:MM:SS"),
+  audioFile: z.string().describe("path to MP3 or external URL"),
+  portrait: z.string().optional(),
+  transcript: z.string().optional().describe("path to transcript JSON"),
   rssGuid: z.string().optional(),
-  chapter: z.number().int().optional(),
-  episode: z.number().int().optional(),
-  duration: z.number().int().describe("seconds"),
-  recordedDate: isoDateLike.optional(),
-  publishedDate: isoDateLike,
-  audioUrl: z.url(),
-  summary: z.string().min(1).max(600),
-  relatedStory: slug.optional(),
-  relatedPeople: z.array(slug).default([]),
-  relatedPlaces: z.array(slug).default([]),
-  collection: slug.optional(),
+  summary: z.string().default(""),
+  ...linkFields,
 });
 export type Audio = z.infer<typeof audioSchema>;
 
@@ -194,9 +168,10 @@ export type Audio = z.infer<typeof audioSchema>;
 export const mapSchema = z.object({
   title: z.string().min(1),
   slug,
+  type: z.literal("map").optional(),
   year: z.number().int(),
-  type: z.enum(["survey", "land_grant", "topo", "road", "modern", "plat"]),
-  scan: image,
+  mapType: z.enum(["survey", "land_grant", "topo", "road", "modern", "plat"]),
+  image: z.string().optional(),
   georeference: z
     .object({
       bounds: z.tuple([
@@ -207,23 +182,41 @@ export const mapSchema = z.object({
     })
     .optional(),
   source: z.string().min(1),
+  summary: z.string().min(1).max(480),
+  ...linkFields,
 });
 export type CartoMap = z.infer<typeof mapSchema>;
 
-// --- Meeting ---------------------------------------------------------------
+// --- Meeting (history-club proceedings) ------------------------------------
 
 export const meetingSchema = z.object({
   title: z.string().min(1),
   slug,
+  type: z.literal("meeting").optional(),
   date: isoDateLike,
   location: z.string().min(1),
   attendees: z.array(z.string()).default([]),
   presenters: z.array(z.string()).default([]),
   topics: z.array(z.string()).default([]),
-  recording: slug.optional(),               // Audio slug
-  collection: slug.optional(),
+  summary: z.string().default(""),
+  ...linkFields,
 });
 export type Meeting = z.infer<typeof meetingSchema>;
+
+// --- Collection (community group / archive grouping) -----------------------
+
+export const collectionSchema = z.object({
+  title: z.string().min(1),
+  slug,
+  type: z.literal("collection").optional(),
+  curator: z.string().min(1).describe("Owning group, e.g. 'Westlake Historical Society'"),
+  contact: z.string().optional(),
+  dateRange: z.string().optional().describe("e.g. '1860–present'"),
+  summary: z.string().min(1).max(480),
+  featured: z.boolean().default(false),
+  ...linkFields,
+});
+export type Collection = z.infer<typeof collectionSchema>;
 
 // --- Registry --------------------------------------------------------------
 
@@ -236,6 +229,7 @@ export const SCHEMAS = {
   audio: audioSchema,
   maps: mapSchema,
   meetings: meetingSchema,
+  collections: collectionSchema,
 } as const;
 
 export type ContentType = keyof typeof SCHEMAS;
@@ -249,4 +243,18 @@ export const CONTENT_TYPES: ContentType[] = [
   "audio",
   "maps",
   "meetings",
+  "collections",
 ];
+
+/** Singular human label for a given content type (e.g. "stories" → "Story"). */
+export const TYPE_LABEL: Record<ContentType, string> = {
+  stories: "Story",
+  people: "Person",
+  places: "Place",
+  eras: "Era",
+  documents: "Document",
+  audio: "Audio",
+  maps: "Map",
+  meetings: "Meeting",
+  collections: "Collection",
+};

@@ -123,7 +123,24 @@ export async function loadOne<T extends ContentType>(
  * throw) on dangling slugs. Renderers should treat missing references as
  * "drop the link" rather than 404, so the archive stays browsable while
  * curators are still adding content.
+ *
+ * The new frontmatter shape uses plural slug arrays (people, places, stories,
+ * documents, audio, maps, collections) on every cross-referencing entity, so
+ * the same six checks cover all entity types.
  */
+
+// Maps a frontmatter array key → the content type it points at.
+const REF_KEYS: Record<string, ContentType> = {
+  people: "people",
+  places: "places",
+  stories: "stories",
+  documents: "documents",
+  audio: "audio",
+  maps: "maps",
+  eras: "eras",
+  collections: "collections",
+};
+
 function validateCrossReferences(index: ContentIndex): void {
   const exists = (type: ContentType, slug: string) =>
     index[type].some((i) => i.slug === slug);
@@ -133,53 +150,54 @@ function validateCrossReferences(index: ContentIndex): void {
     console.warn(`[content] dangling reference in ${where}: "${ref}" not found`);
   };
 
-  for (const story of index.stories) {
-    const f = story.frontmatter as { storyteller?: string; era?: string; people?: string[]; places?: string[]; audio?: string };
-    if (f.storyteller && !exists("people", f.storyteller))
-      warn(`stories/${story.slug}.storyteller`, f.storyteller);
-    if (f.era && !exists("eras", f.era))
-      warn(`stories/${story.slug}.era`, f.era);
-    for (const p of f.people ?? [])
-      if (!exists("people", p)) warn(`stories/${story.slug}.people`, p);
-    for (const p of f.places ?? [])
-      if (!exists("places", p)) warn(`stories/${story.slug}.places`, p);
-    if (f.audio && !exists("audio", f.audio))
-      warn(`stories/${story.slug}.audio`, f.audio);
-  }
-
-  for (const place of index.places) {
-    const f = place.frontmatter as { era?: string };
-    if (f.era && !exists("eras", f.era))
-      warn(`places/${place.slug}.era`, f.era);
-  }
-
-  for (const audio of index.audio) {
-    const f = audio.frontmatter as { relatedStory?: string };
-    if (f.relatedStory && !exists("stories", f.relatedStory))
-      warn(`audio/${audio.slug}.relatedStory`, f.relatedStory);
+  for (const type of CONTENT_TYPES) {
+    for (const item of index[type]) {
+      const fm = item.frontmatter as Record<string, unknown>;
+      for (const [key, targetType] of Object.entries(REF_KEYS)) {
+        const refs = fm[key];
+        if (Array.isArray(refs)) {
+          for (const ref of refs) {
+            if (typeof ref === "string" && !exists(targetType, ref)) {
+              warn(`${type}/${item.slug}.${key}`, ref);
+            }
+          }
+        }
+      }
+    }
   }
 }
 
 // --- Reverse-lookup helpers used by detail pages ---------------------------
 
-export async function getStoriesMentioning(
-  type: "people" | "places",
-  slug: string,
+/**
+ * Find every item across all content types that references `targetSlug`
+ * via any of the cross-reference array keys. Used to populate Sources &
+ * Connections sidebars (e.g. "stories that mention this person").
+ */
+export async function getReferencingItems(
+  refKey: keyof typeof REF_KEYS,
+  targetSlug: string,
 ): Promise<LoadedItem[]> {
-  const { stories } = await loadAllContent();
-  const key = type === "people" ? "people" : "places";
-  return stories.filter((s) => {
-    const refs = (s.frontmatter as Record<string, unknown>)[key];
-    return Array.isArray(refs) && refs.includes(slug);
-  });
+  const all = await loadAllContent();
+  const out: LoadedItem[] = [];
+  for (const type of CONTENT_TYPES) {
+    for (const item of all[type]) {
+      const refs = (item.frontmatter as Record<string, unknown>)[refKey];
+      if (Array.isArray(refs) && refs.includes(targetSlug)) {
+        out.push(item);
+      }
+    }
+  }
+  return out;
 }
 
-export async function getStoriesInEra(eraSlug: string): Promise<LoadedItem[]> {
-  const { stories } = await loadAllContent();
-  return stories.filter((s) => (s.frontmatter as { era?: string }).era === eraSlug);
-}
-
-export async function getStoryByAudio(audioSlug: string): Promise<LoadedItem | null> {
-  const { stories } = await loadAllContent();
-  return stories.find((s) => (s.frontmatter as { audio?: string }).audio === audioSlug) ?? null;
+/** Resolve an array of slugs to loaded items of a given type, dropping misses. */
+export async function resolveRefs<T extends ContentType>(
+  type: T,
+  slugs: string[] | undefined,
+): Promise<LoadedItem[]> {
+  if (!slugs?.length) return [];
+  const all = await loadType(type);
+  const bySlug = new Map(all.map((i) => [i.slug, i]));
+  return slugs.map((s) => bySlug.get(s)).filter((i): i is LoadedItem => Boolean(i));
 }
