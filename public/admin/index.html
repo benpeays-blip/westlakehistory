@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Westlake History — Content Manager</title>
+    <meta name="robots" content="noindex" />
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Sveltia CMS — git-backed content editor for non-developer curators.
+      Loads from a CDN; the editor reads /admin/config.yml on startup, then
+      uses the GitHub OAuth backend (configured in that file) to commit
+      changes back to the repo.
+
+      To enable for real:
+        1. Register a GitHub OAuth app and point it at:
+             https://westlakehistory.com/admin/
+           Redirect URL: https://api.netlify.com/auth/done (or any
+           OAuth-broker you choose; Decap CMS Cloud also works).
+        2. Add the OAuth client_id to /admin/config.yml.
+        3. Invite curators to the GitHub repo so they can commit.
+    -->
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+  </body>
+</html>

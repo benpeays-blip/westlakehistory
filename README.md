@@ -32,10 +32,15 @@ Requirements: Node 20+, pnpm 9+.
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:3000
-pnpm build        # production build
+pnpm dev              # http://localhost:3000
+pnpm build            # production build
 pnpm lint
+pnpm content:check    # validate every MDX frontmatter + cross-reference
+pnpm transcribe       # Whisper-transcribe audio entries (needs OPENAI_API_KEY)
 ```
+
+CI runs `content:check` + `lint` + `build` on every pull request — see
+`.github/workflows/ci.yml`.
 
 The homepage pulls live data from the *Our Westlake* Buzzsprout RSS feed at
 build time (`lib/buzzsprout.ts`), with hourly ISR revalidation. If the feed is
@@ -102,8 +107,19 @@ Currently only the homepage is implemented. As content types come online:
 - **Rights**: anything under copyright gets a clear `rights` field. Public
   domain by default.
 
-Once Sveltia CMS lands (Phase 6), curators will edit through `/admin` with no
-need to touch code.
+### Editing through the CMS
+
+A minimal Sveltia CMS configuration lives in `public/admin/`. The
+`/admin` route loads the editor; collections in `config.yml` mirror the
+Zod schemas. The CMS is non-functional until you:
+
+1. Register a GitHub OAuth app and point it at
+   `https://westlakehistory.com/admin/`.
+2. Add the OAuth client_id to `public/admin/config.yml`.
+3. Invite curators to the GitHub repo so commits succeed.
+
+Until then, content is authored as plain `.mdx` files under `/content/`
+and committed to the repo directly.
 
 ---
 

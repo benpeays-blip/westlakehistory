@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "content:check": "node scripts/content-check.mjs"
+    "content:check": "node scripts/content-check.mjs",
+    "transcribe": "node scripts/transcribe.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

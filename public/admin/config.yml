@@ -1,0 +1,204 @@
+# Sveltia CMS configuration for Westlake History.
+#
+# Collections below mirror the Zod schemas in /lib/schemas. Curators editing
+# through /admin/ will see the same set of fields the build validates against,
+# and saving in the CMS commits an .mdx file directly to the GitHub repo.
+#
+# Backend / OAuth must be wired up before the CMS will let anyone log in —
+# see /admin/index.html for the steps.
+
+backend:
+  name: github
+  repo: benpeays-blip/westlakehistory
+  branch: main
+  base_url: https://api.netlify.com   # or self-hosted oauth broker
+  open_authoring: false
+
+publish_mode: editorial_workflow
+media_folder: public/media
+public_folder: /media
+
+site_url: https://westlakehistory.com
+display_url: https://westlakehistory.com
+logo_url: https://westlakehistory.com/icon.png
+
+collections:
+  - name: stories
+    label: Stories
+    folder: content/stories
+    create: true
+    extension: mdx
+    format: frontmatter
+    slug: "{{slug}}"
+    summary: "{{title}}  —  {{date}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string, hint: "kebab-case" }
+      - { label: Date, name: date, widget: datetime, format: "YYYY-MM-DD", date_format: true, time_format: false }
+      - { label: Era (free text), name: era, widget: list, default: [] }
+      - { label: Tags, name: tags, widget: list, default: [] }
+      - { label: Summary, name: summary, widget: text, hint: "1–2 sentences" }
+      - { label: Hero image (optional), name: heroImage, widget: image, required: false }
+      - { label: Hero caption (optional), name: heroCaption, widget: string, required: false }
+      - { label: People (slugs), name: people, widget: list, default: [] }
+      - { label: Places (slugs), name: places, widget: list, default: [] }
+      - { label: Documents (slugs), name: documents, widget: list, default: [] }
+      - { label: Audio (slugs), name: audio, widget: list, default: [] }
+      - { label: Maps (slugs), name: maps, widget: list, default: [] }
+      - { label: Eras (slugs), name: eras, widget: list, default: [] }
+      - { label: Collections (slugs), name: collections, widget: list, default: [] }
+      - { label: Source notes, name: sourceNotes, widget: list, default: [] }
+      - { label: Featured, name: featured, widget: boolean, default: false }
+      - { label: Byline, name: byline, widget: string, default: "Westlake Historical Society" }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: people
+    label: People
+    folder: content/people
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string, hint: "Person's display name" }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Birth date, name: birthDate, widget: string, required: false }
+      - { label: Death date, name: deathDate, widget: string, required: false }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Roles, name: roles, widget: list, default: [] }
+      - { label: Portrait, name: portrait, widget: image, required: false }
+      - { label: Places, name: places, widget: list, default: [] }
+      - { label: Stories, name: stories, widget: list, default: [] }
+      - { label: Documents, name: documents, widget: list, default: [] }
+      - { label: Eras, name: eras, widget: list, default: [] }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: places
+    label: Places
+    folder: content/places
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Place type, name: placeType, widget: string, hint: "Ranch, Road, School, Lodge, Dam, Lake..." }
+      - { label: Location label, name: locationLabel, widget: string, required: false }
+      - label: Coordinates
+        name: coordinates
+        widget: object
+        fields:
+          - { label: Latitude, name: lat, widget: number, value_type: float }
+          - { label: Longitude, name: lng, widget: number, value_type: float }
+      - { label: Year built, name: yearBuilt, widget: number, required: false, value_type: int }
+      - { label: Year demolished, name: yearDemolished, widget: number, required: false, value_type: int }
+      - label: Status
+        name: status
+        widget: select
+        options: ["extant", "demolished", "renamed", "unknown"]
+        default: "unknown"
+      - { label: Historical names, name: historicalNames, widget: list, default: [] }
+      - { label: Summary, name: summary, widget: text }
+      - { label: People, name: people, widget: list, default: [] }
+      - { label: Stories, name: stories, widget: list, default: [] }
+      - { label: Documents, name: documents, widget: list, default: [] }
+      - { label: Maps, name: maps, widget: list, default: [] }
+      - { label: Eras, name: eras, widget: list, default: [] }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: documents
+    label: Documents
+    folder: content/documents
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Document type, name: documentType, widget: string, hint: "Deed, Photo, Letter, Newspaper, Map, Ledger..." }
+      - { label: Date, name: date, widget: string, required: false }
+      - { label: Creator, name: creator, widget: string, required: false }
+      - { label: Source citation, name: source, widget: string }
+      - { label: Image / scan, name: image, widget: image, required: false }
+      - { label: Rights statement, name: rights, widget: string }
+      - { label: People, name: people, widget: list, default: [] }
+      - { label: Places, name: places, widget: list, default: [] }
+      - { label: Stories, name: stories, widget: list, default: [] }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: audio
+    label: Audio
+    folder: content/audio
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Type, name: audioType, widget: string, default: "Oral History" }
+      - { label: Interviewee, name: interviewee, widget: string, required: false }
+      - { label: Interviewer, name: interviewer, widget: string, required: false }
+      - { label: Date, name: date, widget: string }
+      - { label: Duration, name: duration, widget: string, hint: "MM:SS" }
+      - { label: Audio URL, name: audioFile, widget: string }
+      - { label: RSS GUID (for podcast dedup), name: rssGuid, widget: string, required: false }
+      - { label: Summary, name: summary, widget: text }
+      - { label: People, name: people, widget: list, default: [] }
+      - { label: Places, name: places, widget: list, default: [] }
+      - { label: Stories, name: stories, widget: list, default: [] }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: eras
+    label: Eras
+    folder: content/eras
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Year start, name: yearStart, widget: number, value_type: int }
+      - { label: Year end, name: yearEnd, widget: number, value_type: int }
+      - { label: Summary, name: summary, widget: text }
+      - { label: People, name: people, widget: list, default: [] }
+      - { label: Places, name: places, widget: list, default: [] }
+      - { label: Stories, name: stories, widget: list, default: [] }
+      - { label: Documents, name: documents, widget: list, default: [] }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: meetings
+    label: Meetings
+    folder: content/meetings
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Date, name: date, widget: datetime, format: "YYYY-MM-DD", date_format: true, time_format: false }
+      - { label: Location, name: location, widget: string }
+      - { label: Attendees, name: attendees, widget: list, default: [] }
+      - { label: Presenters, name: presenters, widget: list, default: [] }
+      - { label: Topics, name: topics, widget: list, default: [] }
+      - { label: Summary, name: summary, widget: text, required: false }
+      - { label: Collections, name: collections, widget: list, default: [] }
+      - { label: Body, name: body, widget: markdown }
+
+  - name: collections
+    label: Collections
+    folder: content/collections
+    create: true
+    extension: mdx
+    format: frontmatter
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Curator, name: curator, widget: string }
+      - { label: Date range, name: dateRange, widget: string, required: false }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Featured, name: featured, widget: boolean, default: false }
+      - { label: Body, name: body, widget: markdown }
