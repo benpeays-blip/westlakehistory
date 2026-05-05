@@ -1,28 +1,27 @@
 import type { Metadata } from "next";
-import { Fraunces, Newsreader, JetBrains_Mono } from "next/font/google";
+import { Libre_Baskerville, Source_Sans_3, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import { TopRule } from "./components/TopRule";
-import { Masthead } from "./components/Masthead";
-import { Nav } from "./components/Nav";
-import { Footer } from "./components/Footer";
+import { SiteHeader } from "./components/SiteHeader";
+import { SiteFooter } from "./components/SiteFooter";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
+const libreBaskerville = Libre_Baskerville({
+  variable: "--font-libre-baskerville",
   subsets: ["latin"],
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
   display: "swap",
-  axes: ["opsz", "SOFT", "WONK"],
 });
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const sourceSans = Source_Sans_3({
+  variable: "--font-source-sans",
   subsets: ["latin"],
   display: "swap",
-  axes: ["opsz"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -46,14 +45,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${newsreader.variable} ${jetbrainsMono.variable}`}
+      className={`${libreBaskerville.variable} ${sourceSans.variable} ${plexMono.variable}`}
     >
-      <body className="min-h-screen flex flex-col">
-        <TopRule />
-        <Masthead />
-        <Nav />
+      <body className="min-h-screen flex flex-col bg-paper text-ink">
+        <SiteHeader />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <SiteFooter />
       </body>
     </html>
   );

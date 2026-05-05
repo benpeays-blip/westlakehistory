@@ -1,75 +1,92 @@
 @import "tailwindcss";
 
+/* ----------------------------------------------------------------------------
+ * Hill Country Civic Archive palette.
+ * Warm ivory background, deep live-oak green, ink-black type, muted cedar
+ * + lake-blue accents. Restrained, scholarly, archival.
+ * -------------------------------------------------------------------------- */
+
 @theme inline {
-  --color-paper: #f3ecdb;
-  --color-paper-deep: #ece3cc;
-  --color-ink: #1c1611;
-  --color-ink-soft: #3d3225;
-  --color-ink-mute: #6b5d49;
-  --color-rust: #9c4a2a;
-  --color-rust-deep: #6e3019;
-  --color-sage: #6b7a5e;
-  --color-limestone: #c4b596;
+  --color-paper: #f8f5ee;          /* page background — warm white */
+  --color-limestone: #e7e1d3;      /* surface variant — limestone */
+  --color-ink: #1f2421;            /* primary text */
+  --color-ink-mute: #6e6a61;       /* metadata, secondary text */
+  --color-rule: #d8d1c4;           /* hairline borders */
+  --color-rule-strong: #b8b0a0;    /* stronger dividers */
+  --color-oak: #2f4a3d;            /* live oak green — primary accent */
+  --color-oak-deep: #233832;       /* hover/pressed for green */
+  --color-cedar: #8a5f3d;          /* muted cedar — secondary accent */
+  --color-lake: #486d7a;           /* lake blue — tertiary accent */
 
-  --color-hairline: rgb(28 22 17 / 0.18);
-  --color-hairline-strong: rgb(28 22 17 / 0.45);
-
-  --font-display: var(--font-fraunces);
-  --font-serif: var(--font-newsreader);
-  --font-mono: var(--font-jetbrains-mono);
+  --font-display: var(--font-libre-baskerville);
+  --font-sans: var(--font-source-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
 @layer base {
-  html, body {
-    background: var(--color-paper);
-    color: var(--color-ink);
-    font-family: var(--font-newsreader), Georgia, serif;
-    font-size: 17px;
-    line-height: 1.6;
+  html {
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  ::selection {
+    background: var(--color-oak);
+    color: var(--color-paper);
+  }
+
+  /* Editorial heading defaults — overrideable per page */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 400;
+    color: var(--color-ink);
+    letter-spacing: -0.005em;
+  }
+
+  /* Inline links inherit color, gain a thin underline on hover */
   a {
     color: inherit;
     text-decoration: none;
-    transition: color 200ms;
-  }
-
-  a:hover {
-    color: var(--color-rust);
-  }
-
-  /* Subtle paper grain — applied site-wide */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.35;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    transition: color 150ms ease, border-color 150ms ease;
   }
 }
 
-@utility eyebrow {
+/* ----------------------------------------------------------------------------
+ * Reusable archival utilities — exposed via @utility so they can be applied
+ * with Tailwind syntax (`label-archival`, `meta-line`, etc.).
+ * -------------------------------------------------------------------------- */
+
+@utility label-archival {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--color-ink-mute);
 }
 
-@utility meta-text {
+@utility meta-line {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-mute);
 }
 
-@utility display-italic {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 300;
-  font-variation-settings: 'opsz' 144, 'SOFT' 100, 'WONK' 1;
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-cedar);
+}
+
+@utility editorial-rule {
+  border-color: var(--color-rule);
 }
