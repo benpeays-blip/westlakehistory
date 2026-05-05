@@ -47,6 +47,8 @@ export function SiteFooter() {
               { label: "The project", href: "/about" },
               { label: "Acknowledgments", href: "/about#acknowledgments" },
               { label: "Sources & rights", href: "/about#sources" },
+              { label: "Privacy", href: "/privacy" },
+              { label: "RSS feed", href: "/feed.xml" },
               { label: "Contact", href: "/about#contact" },
             ]}
           />
