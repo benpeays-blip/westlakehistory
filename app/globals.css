@@ -90,3 +90,51 @@
 @utility editorial-rule {
   border-color: var(--color-rule);
 }
+
+/* ----------------------------------------------------------------------------
+ * Print stylesheet — make any story or detail page printable as a clean
+ * archival sheet. Removes nav, footer, sidebars; expands the article to
+ * full width; sets serif body type at a comfortable scale; ensures the
+ * preferred-citation block lands at the foot.
+ * -------------------------------------------------------------------------- */
+
+@media print {
+  html, body {
+    background: white !important;
+    color: #111 !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  body::before { display: none !important; }   /* paper grain */
+
+  header, footer, nav, aside,
+  [data-no-print],
+  .print\:hidden { display: none !important; }
+
+  /* Article column expands to full width when sidebar is hidden */
+  article > div.grid { display: block !important; }
+
+  /* Tighten typography for print */
+  h1 { font-size: 24pt; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 13pt; }
+
+  a { color: inherit !important; text-decoration: none !important; }
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555;
+  }
+
+  /* Avoid orphans + page breaks inside images and citations */
+  figure, aside, blockquote { page-break-inside: avoid; }
+  h1, h2, h3 { page-break-after: avoid; }
+
+  /* Hide Wander suggestions and the Sources sidebar — researchers print
+     for the article, not the navigation graph. */
+  section.continue-wander,
+  [aria-label="Sources & Connections"],
+  details summary,
+  details > div { display: none !important; }
+}
