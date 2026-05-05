@@ -1,64 +1,123 @@
 import Link from "next/link";
-import type { Episode } from "@/lib/buzzsprout";
+import type { LoadedItem } from "@/lib/content";
 
 interface FeaturedItem {
-  type: string;            // archival label, uppercased: STORY, PHOTO COLLECTION, etc.
+  type: string;
   title: string;
   excerpt: string;
   href: string;
-  badge?: string;          // optional date / count line below excerpt
   thumb: ThumbKind;
 }
 
-type ThumbKind = "story" | "photos" | "audio" | "map" | "document";
+type ThumbKind = "story" | "audio" | "place" | "map" | "document" | "collection";
 
 /**
- * Featured This Month — five archival items above the fold.
- * Item content is currently a curated mix: one real podcast episode (the
- * most-recent Buzzsprout entry) wired in dynamically, plus four
- * forward-looking placeholders that point at routes coming in Phase 2/3.
- * Once those collections exist as MDX, swap the placeholders for live data.
+ * Featured This Month — five real archive items, pulled from the live
+ * MDX content graph. The page.tsx loader passes in:
+ *   - the most-recent featured story (or most-recent story if none flagged)
+ *   - the most-recent catalogued audio entry
+ *   - a featured collection
+ *   - a representative place
+ *   - a representative document
+ * Each card links to its detail page; archival labels are derived from
+ * the entity's frontmatter (audioType, placeType, documentType).
  */
-export function FeaturedThisMonth({ heroEpisode }: { heroEpisode: Episode | null }) {
-  const items: FeaturedItem[] = [
-    {
+export function FeaturedThisMonth({
+  story,
+  audio,
+  place,
+  document,
+  collection,
+}: {
+  story: LoadedItem | null;
+  audio: LoadedItem | null;
+  place: LoadedItem | null;
+  document: LoadedItem | null;
+  collection: LoadedItem | null;
+}) {
+  const items: FeaturedItem[] = [];
+
+  if (story) {
+    const f = story.frontmatter as { title: string; summary?: string };
+    items.push({
       type: "STORY",
-      title: "The Low Water Crossing at Bee Cave Road",
-      excerpt: "Early travel routes in the Hill Country.",
-      href: "/stories",
+      title: f.title,
+      excerpt: f.summary ?? "",
+      href: `/stories/${story.slug}`,
       thumb: "story",
-    },
-    {
-      type: "PHOTO COLLECTION",
-      title: "Westlake High School Through the Years",
-      excerpt: "Photos from the 1950s to the 1990s.",
-      href: "/collections",
-      thumb: "photos",
-    },
-    {
-      type: "ORAL HISTORY",
-      title: heroEpisode?.title ?? "Growing Up in Westlake in the 1960s",
-      excerpt: heroEpisode
-        ? `${heroEpisode.storyteller} · ${heroEpisode.publishedAtDisplay}`
-        : "Interview with Jane Hughes.",
-      href: "/audio",
+    });
+  }
+
+  if (audio) {
+    const f = audio.frontmatter as {
+      title: string;
+      audioType?: string;
+      interviewee?: string;
+      duration?: string;
+      summary?: string;
+    };
+    const label = (f.audioType ?? "Oral History").toUpperCase();
+    items.push({
+      type: label,
+      title: f.title,
+      excerpt:
+        f.summary ?? `${f.interviewee ?? "Recording"} · ${f.duration ?? ""}`.trim(),
+      href: `/audio/${audio.slug}`,
       thumb: "audio",
-    },
-    {
-      type: "MAP COLLECTION",
-      title: "Historic Maps of the West Lake Area",
-      excerpt: "From the 1800s to the present.",
-      href: "/maps",
-      thumb: "map",
-    },
-    {
-      type: "DOCUMENT",
-      title: "Original Deed: The Davenport Tract",
-      excerpt: "March 3, 1854.",
-      href: "/documents",
+    });
+  }
+
+  if (place) {
+    const f = place.frontmatter as {
+      title: string;
+      placeType?: string;
+      summary?: string;
+    };
+    const label = (f.placeType ?? "Place").toUpperCase();
+    items.push({
+      type: label,
+      title: f.title,
+      excerpt: f.summary ?? "",
+      href: `/places/${place.slug}`,
+      thumb: "place",
+    });
+  }
+
+  if (document) {
+    const f = document.frontmatter as {
+      title: string;
+      documentType?: string;
+      date?: string;
+      summary?: string;
+    };
+    const label = (f.documentType ?? "Document").toUpperCase();
+    items.push({
+      type: label,
+      title: f.title,
+      excerpt: f.summary ?? f.date ?? "",
+      href: `/documents/${document.slug}`,
       thumb: "document",
-    },
-  ];
+    });
+  }
+
+  if (collection) {
+    const f = collection.frontmatter as {
+      title: string;
+      curator?: string;
+      dateRange?: string;
+      summary?: string;
+    };
+    items.push({
+      type: "COLLECTION",
+      title: f.title,
+      excerpt:
+        f.summary ?? [f.curator, f.dateRange].filter(Boolean).join(" · "),
+      href: `/collections/${collection.slug}`,
+      thumb: "collection",
+    });
+  }
+
+  if (!items.length) return null;
 
   return (
     <section aria-labelledby="featured-heading" className="border-b border-rule">
@@ -92,9 +151,11 @@ export function FeaturedThisMonth({ heroEpisode }: { heroEpisode: Episode | null
                 <h3 className="mt-2 font-display text-[17px] leading-[1.25] text-ink transition-colors group-hover:text-oak">
                   {item.title}
                 </h3>
-                <p className="mt-2 text-[13.5px] leading-[1.45] text-ink-mute">
-                  {item.excerpt}
-                </p>
+                {item.excerpt ? (
+                  <p className="mt-2 line-clamp-3 text-[13.5px] leading-[1.45] text-ink-mute">
+                    {item.excerpt}
+                  </p>
+                ) : null}
               </Link>
             </li>
           ))}
@@ -107,7 +168,8 @@ export function FeaturedThisMonth({ heroEpisode }: { heroEpisode: Episode | null
 /* ---------- Thumbnail art (placeholder until real images land) ------------ */
 
 function ThumbArt({ kind }: { kind: ThumbKind }) {
-  const common = "h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.02]";
+  const common =
+    "h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.02]";
   if (kind === "story") {
     return (
       <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" className={common} aria-hidden="true">
@@ -119,15 +181,17 @@ function ThumbArt({ kind }: { kind: ThumbKind }) {
       </svg>
     );
   }
-  if (kind === "photos") {
+  if (kind === "place") {
     return (
       <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" className={common} aria-hidden="true">
         <rect width="200" height="250" fill="#bfb39a" />
-        <rect x="35" y="50" width="130" height="100" fill="#e7e1d3" stroke="#8a7a62" strokeWidth="1" />
-        <rect x="55" y="65" width="90" height="60" fill="#5d513e" />
-        <circle cx="100" cy="95" r="22" fill="#bfb39a" />
-        <text x="100" y="180" fontFamily="serif" fontStyle="italic" fontSize="14" textAnchor="middle" fill="#1f2421">
-          Westlake High
+        <path d="M0,170 L200,170 L200,250 L0,250 Z" fill="#5d513e" />
+        <g transform="translate(70 130)" fill="#3a3225">
+          <polygon points="0,30 30,10 60,30 60,70 0,70" />
+          <rect x="22" y="42" width="16" height="28" fill="#1f2421" />
+        </g>
+        <text x="100" y="220" fontFamily="serif" fontStyle="italic" fontSize="13" textAnchor="middle" fill="#1f2421">
+          Place
         </text>
       </svg>
     );
@@ -178,9 +242,21 @@ function ThumbArt({ kind }: { kind: ThumbKind }) {
         <circle cx="55" cy="195" r="3" fill="#8a5f3d" />
         <circle cx="120" cy="210" r="3" fill="#8a5f3d" />
         <circle cx="160" cy="180" r="3" fill="#8a5f3d" />
-        <text x="170" y="40" fontFamily="serif" fontStyle="italic" fontSize="11" fill="#1f2421">
-          1944
-        </text>
+      </svg>
+    );
+  }
+  if (kind === "collection") {
+    return (
+      <svg viewBox="0 0 200 250" preserveAspectRatio="xMidYMid slice" className={common} aria-hidden="true">
+        <rect width="200" height="250" fill="#cabe9f" />
+        {[35, 75, 115, 155].map((y) => (
+          <g key={y} transform={`translate(40 ${y})`}>
+            <rect width="120" height="22" fill="#e8dfc8" stroke="#3a3225" strokeWidth="0.5" />
+            <rect x="6" y="6" width="40" height="2" fill="#3a3225" />
+            <rect x="6" y="11" width="60" height="2" fill="#3a3225" opacity="0.6" />
+            <rect x="6" y="16" width="36" height="2" fill="#3a3225" opacity="0.4" />
+          </g>
+        ))}
       </svg>
     );
   }

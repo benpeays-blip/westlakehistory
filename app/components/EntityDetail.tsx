@@ -5,6 +5,7 @@ import type { ContentType } from "@/lib/schemas";
 import { TYPE_LABEL } from "@/lib/schemas";
 import { SourcesConnectionsSidebar } from "./SourcesConnectionsSidebar";
 import { WanderTheArchive } from "./WanderTheArchive";
+import { Citation } from "./Citation";
 import { renderMarkdown } from "@/lib/markdown";
 
 interface EntityDetailProps {
@@ -110,6 +111,22 @@ export async function EntityDetail({
               {renderMarkdown(item.body, { components: mdxComponents })}
             </div>
           ) : null}
+
+          <Citation
+            title={String(f.title ?? item.slug)}
+            type={item.type}
+            slug={item.slug}
+            date={typeof f.date === "string" ? f.date : undefined}
+            source={typeof f.source === "string" ? f.source : undefined}
+            rights={typeof f.rights === "string" ? f.rights : undefined}
+            contributor={
+              typeof f.contributor === "string"
+                ? f.contributor
+                : typeof f.curator === "string"
+                  ? f.curator
+                  : undefined
+            }
+          />
         </div>
 
         <SourcesConnectionsSidebar groups={groups} sourceNotes={sourceNotes} />

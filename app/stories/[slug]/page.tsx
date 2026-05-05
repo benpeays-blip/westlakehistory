@@ -4,6 +4,7 @@ import { loadOne, loadType, resolveRefs } from "@/lib/content";
 import type { Story } from "@/lib/schemas";
 import { SourcesConnectionsSidebar } from "@/app/components/SourcesConnectionsSidebar";
 import { WanderTheArchive } from "@/app/components/WanderTheArchive";
+import { Citation } from "@/app/components/Citation";
 import { renderMarkdown } from "@/lib/markdown";
 
 export async function generateStaticParams() {
@@ -110,7 +111,13 @@ export default async function StoryPage({
             {renderMarkdown(story.body, { components: mdxComponents })}
           </div>
 
-          <CitationBlock story={f} />
+          <Citation
+            title={f.title}
+            type="stories"
+            slug={slug}
+            date={formatDate(f.date)}
+            contributor={f.byline}
+          />
         </div>
 
         <SourcesConnectionsSidebar
@@ -176,19 +183,6 @@ function Tag({
   }
   return (
     <span className="text-[13px] text-ink-mute">{children}</span>
-  );
-}
-
-function CitationBlock({ story }: { story: Story }) {
-  const url = `https://westlakehistory.com/stories/${story.slug}`;
-  return (
-    <aside className="mt-12 border-t border-rule pt-8">
-      <h3 className="label-archival mb-3">Preferred Citation</h3>
-      <p className="text-[14px] leading-relaxed text-ink-mute">
-        {story.byline}. <em className="not-italic text-ink">"{story.title}."</em>{" "}
-        Westlake History, {formatDate(story.date)}. {url}
-      </p>
-    </aside>
   );
 }
 

@@ -104,6 +104,13 @@ function Subtitle({
   } else if (type === "collections") {
     if (typeof f.curator === "string") bits.push(f.curator);
     if (typeof f.dateRange === "string") bits.push(f.dateRange);
+  } else if (type === "meetings") {
+    if (typeof f.date === "string") bits.push(f.date);
+    if (typeof f.location === "string") bits.push(String(f.location));
+  } else if (type === "audio") {
+    if (typeof f.audioType === "string") bits.push(String(f.audioType));
+    if (typeof f.interviewee === "string") bits.push(String(f.interviewee));
+    if (typeof f.duration === "string") bits.push(String(f.duration));
   }
   if (!bits.length) return null;
   return <p className="meta-line mt-1.5">{bits.join(" · ")}</p>;
