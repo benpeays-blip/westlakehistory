@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { loadOne, loadType } from "@/lib/content";
 import { EntityDetail } from "@/app/components/EntityDetail";
+import { PlaceTimeline } from "@/app/components/PlaceTimeline";
+import type { MapPin } from "@/lib/map-types";
 
 export async function generateStaticParams() {
   const items = await loadType("places");
@@ -32,12 +34,15 @@ export default async function PlacePage({
   if (!item) notFound();
 
   const f = item.frontmatter as {
+    title?: string;
     placeType?: string;
     locationLabel?: string;
     historicalNames?: string[];
     yearBuilt?: number | string;
     yearDemolished?: number | string;
     status?: string;
+    summary?: string;
+    coordinates?: { lat: number; lng: number };
   };
 
   const yearLine =
@@ -46,6 +51,24 @@ export default async function PlacePage({
       : null;
   const historicalNames = f.historicalNames?.length
     ? `Also known as: ${f.historicalNames.join(", ")}`
+    : null;
+
+  // Build the MapPin shape the PlaceTimeline expects. The placeType-to-layer
+  // mapping isn't needed here (the viewer ignores layer), so any value works.
+  const pin: MapPin | null = f.coordinates
+    ? {
+        slug,
+        title: f.title ?? slug,
+        href: `/places/${slug}`,
+        summary: f.summary ?? "",
+        placeType: f.placeType ?? "Place",
+        layer: "buildings",
+        lat: f.coordinates.lat,
+        lng: f.coordinates.lng,
+        yearBuilt: toYear(f.yearBuilt),
+        yearDemolished: toYear(f.yearDemolished),
+        historicalNames: f.historicalNames,
+      }
     : null;
 
   return (
@@ -61,6 +84,13 @@ export default async function PlacePage({
         f.status,
         historicalNames,
       ]}
+      extra={pin ? <PlaceTimeline pin={pin} /> : null}
     />
   );
+}
+
+function toYear(v: number | string | undefined): number | undefined {
+  if (v == null) return undefined;
+  const n = typeof v === "number" ? v : parseInt(v, 10);
+  return Number.isFinite(n) ? n : undefined;
 }

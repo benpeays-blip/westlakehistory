@@ -16,6 +16,9 @@ interface EntityDetailProps {
   backLabel: string;
   /** Lines of compact metadata shown below the title (e.g. "1826–1902") */
   metaLines?: (string | null | undefined)[];
+  /** Extra UI rendered between the header and the body — e.g. the
+   *  Then/Now/Layered viewer on a Place page. */
+  extra?: React.ReactNode;
 }
 
 const SIDEBAR_GROUPS: { key: string; label: string; type: ContentType }[] = [
@@ -35,6 +38,7 @@ export async function EntityDetail({
   backHref,
   backLabel,
   metaLines,
+  extra,
 }: EntityDetailProps) {
   const f = item.frontmatter as Record<string, unknown>;
 
@@ -98,6 +102,8 @@ export async function EntityDetail({
               </p>
             ) : null}
           </header>
+
+          {extra ? <div className="mt-2">{extra}</div> : null}
 
           {item.body.trim() ? (
             <div className="mt-10">
