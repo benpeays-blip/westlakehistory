@@ -38,7 +38,7 @@ export default async function StoryPage({
 
   const f = story.frontmatter as Story;
 
-  const [people, places, documents, audio, maps, collections] =
+  const [people, places, documents, audio, maps, collections, allStories] =
     await Promise.all([
       resolveRefs("people", f.people),
       resolveRefs("places", f.places),
@@ -46,7 +46,20 @@ export default async function StoryPage({
       resolveRefs("audio", f.audio),
       resolveRefs("maps", f.maps),
       resolveRefs("collections", f.collections),
+      loadType("stories"),
     ]);
+
+  // Stories sorted newest-first; find this story's neighbors so readers can
+  // walk the index without going back to /stories.
+  const sortedStories = [...allStories].sort((a, b) =>
+    ((b.frontmatter as { date?: string }).date ?? "").localeCompare(
+      (a.frontmatter as { date?: string }).date ?? "",
+    ),
+  );
+  const idx = sortedStories.findIndex((s) => s.slug === slug);
+  const prev = idx > 0 ? sortedStories[idx - 1] : null;
+  const next =
+    idx >= 0 && idx < sortedStories.length - 1 ? sortedStories[idx + 1] : null;
 
   const groups = [
     { label: "People", items: people },
@@ -73,7 +86,7 @@ export default async function StoryPage({
               {f.title}
             </h1>
             <p className="mt-4 text-[16px] leading-snug text-ink-mute">
-              By {f.byline} · {formatDate(f.date)}
+              By {f.byline} · {formatDate(f.date)} · {readingTime(story.body)} min read
             </p>
             {f.tags.length || f.era.length ? (
               <div className="mt-5 flex flex-wrap gap-x-3 gap-y-2">
@@ -125,6 +138,8 @@ export default async function StoryPage({
           sourceNotes={f.sourceNotes}
         />
       </div>
+
+      <PrevNext prev={prev} next={next} />
 
       <WanderTheArchive fromType="stories" fromSlug={slug} />
     </article>
@@ -184,6 +199,55 @@ function Tag({
   return (
     <span className="text-[13px] text-ink-mute">{children}</span>
   );
+}
+
+function PrevNext({
+  prev,
+  next,
+}: {
+  prev: { slug: string; frontmatter: unknown } | null;
+  next: { slug: string; frontmatter: unknown } | null;
+}) {
+  if (!prev && !next) return null;
+  return (
+    <nav
+      aria-label="Story navigation"
+      className="mt-12 grid gap-px overflow-hidden border-y border-rule bg-rule sm:grid-cols-2"
+    >
+      {prev ? (
+        <Link
+          href={`/stories/${prev.slug}`}
+          className="group bg-paper px-6 py-6 transition-colors hover:bg-limestone/40 sm:px-8"
+        >
+          <p className="meta-line text-ink-mute">← Newer story</p>
+          <p className="mt-2 font-display text-[18px] leading-snug text-ink transition-colors group-hover:text-oak">
+            {(prev.frontmatter as { title: string }).title}
+          </p>
+        </Link>
+      ) : (
+        <div className="bg-paper" />
+      )}
+      {next ? (
+        <Link
+          href={`/stories/${next.slug}`}
+          className="group bg-paper px-6 py-6 text-right transition-colors hover:bg-limestone/40 sm:px-8"
+        >
+          <p className="meta-line text-ink-mute">Older story →</p>
+          <p className="mt-2 font-display text-[18px] leading-snug text-ink transition-colors group-hover:text-oak">
+            {(next.frontmatter as { title: string }).title}
+          </p>
+        </Link>
+      ) : (
+        <div className="bg-paper" />
+      )}
+    </nav>
+  );
+}
+
+function readingTime(body: string): number {
+  // 200 words per minute is the conventional reading-rate estimate.
+  const words = body.trim().split(/\s+/).length;
+  return Math.max(1, Math.round(words / 200));
 }
 
 function formatDate(iso?: string): string {

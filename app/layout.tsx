@@ -48,8 +48,16 @@ export default function RootLayout({
       className={`${libreBaskerville.variable} ${sourceSans.variable} ${plexMono.variable}`}
     >
       <body className="min-h-screen flex flex-col bg-paper text-ink">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-oak focus:px-4 focus:py-2 focus:text-paper focus:outline-none"
+        >
+          Skip to main content
+        </a>
         <SiteHeader />
-        <main className="flex-1">{children}</main>
+        <main id="main" className="flex-1">
+          {children}
+        </main>
         <SiteFooter />
       </body>
     </html>
