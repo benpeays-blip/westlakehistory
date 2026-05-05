@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { loadOne, loadType, resolveRefs } from "@/lib/content";
 import type { Story } from "@/lib/schemas";
 import { SourcesConnectionsSidebar } from "@/app/components/SourcesConnectionsSidebar";
+import { WanderTheArchive } from "@/app/components/WanderTheArchive";
 import { renderMarkdown } from "@/lib/markdown";
 
 export async function generateStaticParams() {
@@ -117,6 +118,8 @@ export default async function StoryPage({
           sourceNotes={f.sourceNotes}
         />
       </div>
+
+      <WanderTheArchive fromType="stories" fromSlug={slug} />
     </article>
   );
 }

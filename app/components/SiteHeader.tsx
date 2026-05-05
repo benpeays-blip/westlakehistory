@@ -38,13 +38,13 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <button
-          type="button"
+        <Link
+          href="/search"
           aria-label="Search the archive"
           className="ml-auto rounded-full p-2 text-ink-mute transition-colors hover:bg-limestone hover:text-ink md:ml-0"
         >
           <SearchIcon className="h-[18px] w-[18px]" />
-        </button>
+        </Link>
       </div>
 
       <nav aria-label="Primary mobile" className="border-t border-rule md:hidden">

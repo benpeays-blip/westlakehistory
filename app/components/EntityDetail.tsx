@@ -4,6 +4,7 @@ import { resolveRefs, getReferencingItems } from "@/lib/content";
 import type { ContentType } from "@/lib/schemas";
 import { TYPE_LABEL } from "@/lib/schemas";
 import { SourcesConnectionsSidebar } from "./SourcesConnectionsSidebar";
+import { WanderTheArchive } from "./WanderTheArchive";
 import { renderMarkdown } from "@/lib/markdown";
 
 interface EntityDetailProps {
@@ -107,6 +108,8 @@ export async function EntityDetail({
 
         <SourcesConnectionsSidebar groups={groups} sourceNotes={sourceNotes} />
       </div>
+
+      <WanderTheArchive fromType={item.type} fromSlug={item.slug} />
     </article>
   );
 }
