@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { loadOne, loadType } from "@/lib/content";
 import { EntityDetail } from "@/app/components/EntityDetail";
 import { PlaceTimeline } from "@/app/components/PlaceTimeline";
+import { ArtifactGallery } from "@/app/components/ArtifactGallery";
 import type { MapPin } from "@/lib/map-types";
 
 export async function generateStaticParams() {
@@ -84,7 +85,17 @@ export default async function PlacePage({
         f.status,
         historicalNames,
       ]}
-      extra={pin ? <PlaceTimeline pin={pin} /> : null}
+      extra={
+        <>
+          <ArtifactGallery
+            entityType="places"
+            entitySlug={slug}
+            heading={`Photographs of ${f.title ?? slug}`}
+            cap={16}
+          />
+          {pin ? <PlaceTimeline pin={pin} /> : null}
+        </>
+      }
     />
   );
 }

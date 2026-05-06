@@ -59,6 +59,8 @@ const PERSON_PATTERNS = [
   { rx: /\bemmett (robert )?shelton(,? sr\.?)?\b/i, slug: "emmett-shelton-sr" },
   { rx: /\bpolk shelton\b/i, slug: "polk-shelton" },
   { rx: /\b(james|buck) ('?buck'? )?davenport\b/i, slug: "james-buck-davenport" },
+  { rx: /\bbruce marshall\b/i, slug: "bruce-marshall" },
+  { rx: /\b(mary (ellen )?(mowinckle|mowinkle)( johnson)?|mowinckle)\b/i, slug: "mary-mowinckle-johnson" },
 ];
 
 const STORY_PATTERNS = [

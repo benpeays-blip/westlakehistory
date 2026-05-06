@@ -87,6 +87,9 @@ export const personSchema = z.object({
   deathDate: yearLike.optional(),
   summary: z.string().min(1).max(480),
   portrait: z.string().optional(),
+  portraitAlt: z.string().optional(),
+  portraitCredit: z.string().optional(),
+  portraitYear: z.number().int().optional(),
   roles: z.array(z.string()).default([]),
   ...linkFields,
 });
