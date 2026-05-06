@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;  charset=UTF-8" />
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAM</title>
+    <link rel="stylesheet" href="/pth/media/dam/dam.css">
+    <script async defer src="/pth/media/altcha/altcha.min.js" type="module"></script>
+</head>
+<body>
+    <div id="altcha-content">
+        <h1><img src="/pth/media/assets/public/images/pth/favicons/favicon.ico"> texashistory.unt.edu</h1>
+        <h2>Gauging your humanity...This may take some seconds.</h2>
+        <div>
+            <form id="altcha-submission">
+                <input type="hidden" name="csrfmiddlewaretoken" value="VhBhMiVEa33lugTIsOnhcri2rItHsIczv2N4RtCzklXwbOYMLfbpmPAEm0Ccjeq2">
+                <altcha-widget id="altcha"></altcha-widget>
+            </form>
+        </div>
+        
+            <h3>If you are unable to reach our site content, please <a href="https://texashistory.unt.edu/feedback/?cat=Technical+Issue&user_feedback=Altcha+Challenge+Issue+Details%3A">let us know</a>.</h3>
+        
+    </div>
+    <script type="text/javascript">
+        window.addEventListener("load", () => {
+            document.querySelector("#altcha").configure({
+                challenge: {
+                    algorithm: "SHA-256",
+                    challenge: "814cf1facc97391c5b34baac026e9cd736341a836968b55bfa94ee4bfbd5fab5",
+                    salt: "933d60b3c5f045c1c586d214?expires=1778098718",
+                    signature: "f9964faaedd52f6383f5312e6f81d27cd27445da402f6c1c0cda42ce0ed66ebd",
+                    maxnumber: "500000",
+                },
+                auto: "onload",
+                debug: false,
+                delay: 0,
+                hidefooter: true,
+                hidelogo: false,
+            });
+        });
+        document.querySelector("altcha-widget").addEventListener("statechange", async (e) => {
+            await e.detail;
+            if (e.detail.state === "verified") {
+                const challengeData = new FormData(document.forms["altcha-submission"]);
+                try {
+                   const response = await fetch("/dam/submit/", {
+                        method: "POST",
+                        body: challengeData,
+                    });
+                    const result = await response.json();
+                    if ("success" in result) {
+                        window.location.replace("/ark:/67531/metapth821306/m1/");
+                    } else {
+                        document.getElementById('altcha-content').innerHTML = `${result.error} If you are unable to reach our site content, please <a href="https://texashistory.unt.edu/feedback/?cat=Technical+Issue&user_feedback=Altcha+Challenge+Issue+Details%3A">let us know</a>.`;
+                    }
+                } catch (error) {
+                    document.getElementById('altcha-content').innerHTML = `${error} If you are unable to reach our site content, please <a href="https://texashistory.unt.edu/feedback/?cat=Technical+Issue&user_feedback=Altcha+Challenge+Issue+Details%3A">let us know</a>.`;
+                    console.error("Challenge submission error:", error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

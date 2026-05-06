@@ -1,8 +1,9 @@
 {
-  "_about": "Items from the Eanes History Center / Westbank Community Library District collection at The Portal to Texas History (UNT Libraries). We catalogue metadata + thumbnails here so the items are discoverable in this archive's search and on the EHC collection page; clicking any item opens the canonical record on texashistory.unt.edu, which hosts the full-resolution scan and provenance metadata. We do not re-host UNT's media. Source feed: https://texashistory.unt.edu/explore/partners/EHC/feed/?q=&t=fulltext&sort=added_d",
-  "_attribution": "Eanes History Center, Westbank Community Library District. Hosted at The Portal to Texas History, a digital repository of UNT Libraries.",
+  "_about": "Items from the Eanes History Center / Westbank Community Library District collection. Westlake History is the official site for this collection, with explicit permission from the Westbank Community Library District. Originals are held by Westbank CLD; high-resolution scans were produced by The Portal to Texas History (UNT Libraries) and are mirrored here under that permission.",
+  "_attribution": "Eanes History Center, Westbank Community Library District. Digital reproductions originally produced by The Portal to Texas History, UNT Libraries.",
   "_partnerUrl": "https://texashistory.unt.edu/explore/partners/EHC/",
-  "_lastFetched": "2018-10-15",
+  "_lastFetched": "2026-05-05",
+  "_permission": "Full reproduction and redistribution permission granted to Westlake History by the Westbank Community Library District as the official archive home for the EHC project.",
   "items": [
     {
       "ark": "metapth1065523",
@@ -353,6 +354,139 @@
       "kind": "interview",
       "summary": "Transcription of an interview with Emmett Shelton and Benton Beard on the rise of the Eanes area, the Beard family, land development, the PTA, and Prohibition.",
       "tags": ["Emmett Shelton Sr.", "Benton Beard", "Beard family", "Prohibition"]
+    },
+    {
+      "ark": "metapth1065504",
+      "title": "Interview with Earl Short",
+      "kind": "interview",
+      "summary": "Transcription of an interview with Earl Short by Dorothy Depwe. Short discusses multiple murders that occurred in the Westlake, Texas area as well as the lives of several local families.",
+      "tags": ["Earl Short", "Dorothy Depwe", "Westlake families"]
+    },
+    {
+      "ark": "metapth1065505",
+      "title": "Group of Boy Scouts",
+      "kind": "photograph",
+      "summary": "Boy Scouts meeting at the Eanes Community Church — eight boys, the second-from-left in uniform, the rest in regular clothing. Reverse marked 'Eanes Community Church Boyscouts'. Damaged: tape and tears.",
+      "tags": ["Boy Scouts", "Eanes Community Church"]
+    },
+    {
+      "ark": "metapth1065506",
+      "title": "Students Playing in the Snow",
+      "kind": "photograph",
+      "summary": "Two Eanes Rock Schoolhouse students playing in the snow — the boy is grabbing the girl's feet while she laughs at the camera. Brick house and trees in the background. Reverse: '6 B Eanes Students 1939-40'.",
+      "tags": ["Eanes Rock Schoolhouse", "1939-40", "snow"]
+    },
+    {
+      "ark": "metapth1065507",
+      "title": "Typed Interview with Mary Ellen Mowinkle",
+      "kind": "interview",
+      "summary": "Mary Ellen Mowinckle (later Johnson) on her years teaching at Eanes Rock Schoolhouse — how she was hired, classroom discipline, and a measles outbreak that left only two students attending class.",
+      "tags": ["Mary Mowinckle Johnson", "Eanes Rock Schoolhouse", "teachers"]
+    },
+    {
+      "ark": "metapth1065509",
+      "title": "Biography of Gertrude Johnson and Winnie Johnson",
+      "kind": "essay",
+      "summary": "Biography of Gertrude (Mrs. Frank A.) Johnson and Winnie (Mrs. E. W.) Johnson as founding members of the Westlake Hills Presbyterian Church in Austin. Notes their being awarded 'Honorary Life Memberships in the Women of the Church.'",
+      "tags": ["Gertrude Johnson", "Winnie Johnson", "Westlake Hills Presbyterian Church"]
+    },
+    {
+      "ark": "metapth1065510",
+      "title": "Eanes Elementary Class Photograph",
+      "kind": "photograph",
+      "summary": "Official Eanes Elementary class photograph for the yearbook — students arranged in four rows with the teacher standing to the right.",
+      "tags": ["Eanes Elementary", "yearbook", "class photograph"]
+    },
+    {
+      "ark": "metapth1065511",
+      "title": "Eanes School Picnic",
+      "kind": "photograph",
+      "summary": "Eanes Rock Schoolhouse students on a picnic at Smith Creek, seated on rocks surrounded by trees. Reverse: 'Eanes School Picnic 1930's'.",
+      "tags": ["Eanes Rock Schoolhouse", "Smith Creek", "1930s", "picnic"]
+    },
+    {
+      "ark": "metapth1065512",
+      "title": "Photograph of Students in a Wagon",
+      "kind": "photograph",
+      "summary": "Eanes Rock Schoolhouse students in a wagon, looking towards a man pointing to something off frame.",
+      "tags": ["Eanes Rock Schoolhouse", "students", "wagon"]
+    },
+    {
+      "ark": "metapth1065513",
+      "title": "Interview with Mr. Elliot",
+      "kind": "interview",
+      "summary": "Transcription of an interview with Mr. Elliot on his upbringing at Noack's Crossing and his eventual move to Eanes County.",
+      "tags": ["Mr. Elliot", "Noack's Crossing", "Eanes County"]
+    },
+    {
+      "ark": "metapth1065521",
+      "title": "Handwritten Note about the Dellana Family",
+      "kind": "manuscript",
+      "summary": "Handwritten account by Dorothy Depwe of life on Tucker Lane in the 1920s — the Tucker family's children and the lives of the Teague, Ryan, Young, and Small families.",
+      "tags": ["Dellana family", "Tucker Lane", "1920s", "Dorothy Depwe"]
+    },
+    {
+      "ark": "metapth1065496",
+      "title": "Portrait of Charles R. Eanes",
+      "kind": "photograph",
+      "summary": "Portrait of Charles Randolph Eanes in a dark suit and vest with a black bow tie. Stamped on reverse: 'H. R. Marks Photographer, Austin, Texas.' Inscribed in blue ink: 'Charles Randolph Eanes 1887-1889.'",
+      "tags": ["Charles Randolph Eanes", "Eanes family", "1887", "portrait"]
+    },
+    {
+      "ark": "metapth1065518",
+      "title": "Photograph of West Lake High School",
+      "kind": "photograph",
+      "summary": "Exterior of West Lake High School with cars in the parking lot and a tree in the foreground.",
+      "tags": ["Westlake High School"]
+    },
+    {
+      "ark": "metapth821262",
+      "title": "1957 Travis County Rural Directory",
+      "kind": "newspaper",
+      "summary": "Directory and classified buyers' guide for Travis County: alphabetical resident and business listings, house numbers by road, farms by type, and a classified ads section.",
+      "tags": ["Travis County", "1957", "directory"]
+    },
+    {
+      "ark": "metapth821478",
+      "title": "1958 Travis County Rural Directory",
+      "kind": "newspaper",
+      "summary": "Directory and classified buyers' guide for Travis County: alphabetical resident and business listings, house numbers by road, farms by type, and a classified ads section.",
+      "tags": ["Travis County", "1958", "directory"]
+    },
+    {
+      "ark": "metapth821421",
+      "title": "Echoes from the Past",
+      "kind": "essay",
+      "summary": "Brochure of historical information and stories about the Presbyterian church in the southern United States, presented at the 1936 Spring meeting of the Presbytery of Brazos in old First Church, Galveston.",
+      "tags": ["Presbyterian church", "Brazos Presbytery", "1936"]
+    },
+    {
+      "ark": "metapth821306",
+      "title": "Frontier Times, Volume 1, Number 3, December 1923",
+      "kind": "newspaper",
+      "summary": "Magazine of frontier history, border tragedy, and pioneer achievement — including articles on Navarro and Denton county colonists, a Texas Ranger's reminiscences, the capture of Cynthia Ann Parker, and James R. Moss of Llano.",
+      "tags": ["Frontier Times", "1923", "Texas Rangers", "Cynthia Ann Parker"]
+    },
+    {
+      "ark": "metapth821227",
+      "title": "The Texas Gulf Historical and Biographical Record, Volume 11, Number 1, November 1975",
+      "kind": "newspaper",
+      "summary": "Book of historical articles about Texas counties and towns and important historical figures.",
+      "tags": ["Texas Gulf Historical and Biographical Record", "1975"]
+    },
+    {
+      "ark": "metapth769666",
+      "title": "Eanes: A History of the School and Community",
+      "kind": "essay",
+      "summary": "Foundational text on the Eanes community and the history of the school district — covers the origins of the city of Austin, the development of the school, and includes transcribed supporting documents.",
+      "tags": ["Eanes ISD", "Eanes School", "Austin history"]
+    },
+    {
+      "ark": "metapth769391",
+      "title": "Eanes: Portrait of a Community",
+      "kind": "essay",
+      "summary": "Book history of the Eanes community area — geology, Native American history, the founding of the community in the mid-1800s, and development through 1986.",
+      "tags": ["Eanes community", "Native American history", "1800s", "1986"]
     }
   ]
 }

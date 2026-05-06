@@ -90,7 +90,11 @@ export default async function EhcPage() {
             ) : null}
           </header>
 
-          <PartnerNotice ehc={ehc} />
+          <PartnerNotice
+            ehc={ehc}
+            mirroredCount={ehc.items.filter((i) => i.mirrored).length}
+            totalCount={ehc.items.length}
+          />
 
           {item.body.trim() ? (
             <div className="mt-10">
@@ -138,13 +142,23 @@ export default async function EhcPage() {
   );
 }
 
-function PartnerNotice({ ehc }: { ehc: { partnerUrl: string; lastFetched: string } }) {
+function PartnerNotice({
+  ehc,
+  mirroredCount,
+  totalCount,
+}: {
+  ehc: { partnerUrl: string; lastFetched: string };
+  mirroredCount: number;
+  totalCount: number;
+}) {
   return (
     <aside className="mt-8 border border-rule bg-limestone/40 p-5 md:p-6">
-      <p className="label-archival mb-2 text-cedar">Hosted partner</p>
+      <p className="label-archival mb-2 text-cedar">Official archive home</p>
       <p className="text-[14.5px] leading-relaxed text-ink">
-        The original items are held by the Westbank Community Library
-        District and digitized by{" "}
+        Westlake History is the official digital home for the Eanes
+        History Center collection, with explicit permission from the
+        Westbank Community Library District. Original digitization was
+        produced by{" "}
         <a
           href={ehc.partnerUrl}
           target="_blank"
@@ -153,8 +167,12 @@ function PartnerNotice({ ehc }: { ehc: { partnerUrl: string; lastFetched: string
         >
           The Portal to Texas History (UNT Libraries)
         </a>
-        . Item metadata is mirrored here for discovery and search; full
-        scans live on the Portal. Catalogue last fetched {ehc.lastFetched}.
+        ; high-resolution scans are mirrored to this site under the
+        Westbank CLD&apos;s permission.
+      </p>
+      <p className="meta-line mt-3 text-ink-mute">
+        {mirroredCount} of {totalCount} scans mirrored locally · catalogue
+        last refreshed {ehc.lastFetched}
       </p>
     </aside>
   );

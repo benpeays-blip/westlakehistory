@@ -1,10 +1,11 @@
 /**
  * Loader for the Eanes History Center / Westbank CLD partner collection.
  *
- * Items live in /content/partners/ehc-items.json — descriptive metadata
- * only, with thumbnails and full-record links pointing back to The Portal
- * to Texas History (UNT Libraries) where the actual scans are hosted.
- * We do not re-host UNT's media; this catalog is a discovery layer.
+ * Westlake History is the official site for this collection under
+ * explicit permission from the Westbank Community Library District.
+ * Item scans are mirrored locally to /public/media/ehc/ via the
+ * fetch-ehc-media script; the loader prefers a local image and falls
+ * back to UNT's hosted scan when the local file isn't yet on disk.
  */
 
 import { promises as fs } from "node:fs";
@@ -16,6 +17,8 @@ const DATA_PATH = path.join(
   "partners",
   "ehc-items.json",
 );
+const LOCAL_THUMB_DIR = path.join(process.cwd(), "public", "media", "ehc", "thumb");
+const LOCAL_IMAGE_DIR = path.join(process.cwd(), "public", "media", "ehc", "image");
 
 const UNT_BASE = "https://texashistory.unt.edu/ark:/67531";
 
@@ -25,10 +28,14 @@ export interface EhcItem {
   kind: ItemKind;
   summary: string;
   tags: string[];
-  /** Full UNT record URL — where the scan and provenance live. */
+  /** Full UNT record URL — where the original record + provenance live. */
   recordUrl: string;
-  /** UNT-hosted thumbnail URL. */
+  /** Image URL to display on the EHC page (local mirror when present, else UNT). */
   thumbUrl: string;
+  /** Larger image for detail views (local mirror when present, else UNT). */
+  imageUrl: string;
+  /** Whether the scan is mirrored locally. */
+  mirrored: boolean;
 }
 
 export type ItemKind =
@@ -47,6 +54,7 @@ export interface EhcCollection {
   attribution: string;
   partnerUrl: string;
   lastFetched: string;
+  permission?: string;
   items: EhcItem[];
 }
 
@@ -56,6 +64,7 @@ export async function loadEhcCollection(): Promise<EhcCollection> {
     _attribution: string;
     _partnerUrl: string;
     _lastFetched: string;
+    _permission?: string;
     items: Array<{
       ark: string;
       title: string;
@@ -64,16 +73,46 @@ export async function loadEhcCollection(): Promise<EhcCollection> {
       tags: string[];
     }>;
   };
+
+  // Discover which scans are mirrored locally so the page can prefer them.
+  const [thumbsLocal, imagesLocal] = await Promise.all([
+    safeListJpgArks(LOCAL_THUMB_DIR),
+    safeListJpgArks(LOCAL_IMAGE_DIR),
+  ]);
+
   return {
     attribution: json._attribution,
     partnerUrl: json._partnerUrl,
     lastFetched: json._lastFetched,
-    items: json.items.map((i) => ({
-      ...i,
-      recordUrl: `${UNT_BASE}/${i.ark}/`,
-      thumbUrl: `${UNT_BASE}/${i.ark}/small/`,
-    })),
+    permission: json._permission,
+    items: json.items.map((i) => {
+      const mirrored = thumbsLocal.has(i.ark) || imagesLocal.has(i.ark);
+      return {
+        ...i,
+        recordUrl: `${UNT_BASE}/${i.ark}/`,
+        thumbUrl: thumbsLocal.has(i.ark)
+          ? `/media/ehc/thumb/${i.ark}.jpg`
+          : `${UNT_BASE}/${i.ark}/small/`,
+        imageUrl: imagesLocal.has(i.ark)
+          ? `/media/ehc/image/${i.ark}.jpg`
+          : `${UNT_BASE}/${i.ark}/m1/`,
+        mirrored,
+      };
+    }),
   };
+}
+
+async function safeListJpgArks(dir: string): Promise<Set<string>> {
+  try {
+    const names = await fs.readdir(dir);
+    return new Set(
+      names
+        .filter((n) => n.endsWith(".jpg"))
+        .map((n) => n.replace(/\.jpg$/, "")),
+    );
+  } catch {
+    return new Set();
+  }
 }
 
 /** Group items by kind for the gallery's category sections. */
