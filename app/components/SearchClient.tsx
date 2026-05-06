@@ -14,7 +14,6 @@ const FILTER_TYPES: { id: string; label: string }[] = [
   { id: "audio,audio-podcast", label: "Audio" },
   { id: "maps", label: "Maps" },
   { id: "collections", label: "Collections" },
-  { id: "ehc-item", label: "EHC partner" },
 ];
 
 export function SearchClient({
@@ -162,16 +161,8 @@ export function SearchClient({
             <li key={r.id}>
               <Link
                 href={r.href}
-                target={
-                  r.type === "audio-podcast" || r.type === "ehc-item"
-                    ? "_blank"
-                    : undefined
-                }
-                rel={
-                  r.type === "audio-podcast" || r.type === "ehc-item"
-                    ? "noopener noreferrer"
-                    : undefined
-                }
+                target={r.type === "audio-podcast" ? "_blank" : undefined}
+                rel={r.type === "audio-podcast" ? "noopener noreferrer" : undefined}
                 className="group block py-6 transition-colors hover:bg-limestone/40"
               >
                 <p className="label-archival text-cedar">{r.typeLabel}</p>

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "content:check": "node scripts/content-check.mjs",
     "transcribe": "node scripts/transcribe.mjs",
-    "fetch-ehc-media": "node scripts/fetch-ehc-media.mjs"
+    "fetch-ehc-media": "node scripts/fetch-ehc-media.mjs",
+    "import:ehc": "node scripts/import-ehc-to-mdx.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

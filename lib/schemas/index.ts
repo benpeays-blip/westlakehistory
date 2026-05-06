@@ -132,13 +132,16 @@ export const documentSchema = z.object({
   title: z.string().min(1),
   slug,
   type: z.literal("document").optional(),
-  documentType: z.string().min(1).describe("Deed, Photo, Letter, Newspaper, Map, Ledger..."),
+  documentType: z.string().min(1).describe("Deed, Photo, Letter, Newspaper, Map, Ledger, Illustration, Book, Manuscript, Interview, Oral History, Essay, Family Record..."),
   date: isoDateLike.optional(),
   creator: z.string().optional(),
   source: z.string().min(1).describe("e.g. 'Deed Book 12, Page 45'"),
   image: z.string().optional(),
+  thumb: z.string().optional().describe("Smaller image for index/grid views"),
   transcription: z.string().optional().describe("path to transcription file"),
   rights: z.string().min(1),
+  externalRecordUrl: z.url().optional().describe("Canonical record at the originating archive (e.g. UNT)."),
+  donor: z.string().optional(),
   ...linkFields,
 });
 export type Document = z.infer<typeof documentSchema>;

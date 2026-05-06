@@ -1,26 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { loadOne } from "@/lib/content";
 import {
-  loadEhcCollection,
-  groupByKind,
-  KIND_LABELS,
-  KIND_ORDER,
-  type EhcItem,
-  type ItemKind,
-} from "@/lib/ehc";
+  loadOne,
+  loadType,
+  resolveRefs,
+  getReferencingItems,
+  type LoadedItem,
+} from "@/lib/content";
 import { SourcesConnectionsSidebar } from "@/app/components/SourcesConnectionsSidebar";
 import { WanderTheArchive } from "@/app/components/WanderTheArchive";
 import { Citation } from "@/app/components/Citation";
 import { renderMarkdown } from "@/lib/markdown";
-import { resolveRefs, getReferencingItems } from "@/lib/content";
 import type { ContentType } from "@/lib/schemas";
 
 export const metadata = {
   title:
     "Eanes History Center · Westbank CLD — Westlake History",
   description:
-    "A 69-item collection of letters, oral histories, photographs, and illustrations from the Eanes History Center, hosted at The Portal to Texas History (UNT Libraries). Catalogued for discovery; full scans on UNT.",
+    "The official archive home for the Eanes History Center collection — letters, oral histories, photographs, illustrations, and books, contributed by Westbank Community Library District.",
 };
 
 const SIDEBAR_GROUPS: { key: string; label: string; type: ContentType }[] = [
@@ -34,33 +31,68 @@ const SIDEBAR_GROUPS: { key: string; label: string; type: ContentType }[] = [
   { key: "collections", label: "Collections", type: "collections" },
 ];
 
+const VISUAL_KINDS = new Set(["Photograph", "Photo", "Illustration", "Map"]);
+
+const KIND_ORDER = [
+  "Photograph",
+  "Illustration",
+  "Oral History",
+  "Interview",
+  "Interview Notes",
+  "Letter",
+  "Essay",
+  "Manuscript",
+  "Newspaper",
+  "Family Record",
+  "Book",
+  "Document",
+];
+
 export default async function EhcPage() {
-  const item = await loadOne("collections", "eanes-history-center");
-  if (!item) notFound();
+  const collectionItem = await loadOne("collections", "eanes-history-center");
+  if (!collectionItem) notFound();
 
-  const ehc = await loadEhcCollection();
-  const byKind = groupByKind(ehc.items);
+  // Pull every document that lists this collection in its `collections` array.
+  // Same source of truth as /documents — the collection page is a filtered
+  // view, not a separate dataset.
+  const allDocs = await loadType("documents");
+  const items = allDocs.filter((d) =>
+    ((d.frontmatter as { collections?: string[] }).collections ?? []).includes(
+      "eanes-history-center",
+    ),
+  );
 
-  const fm = item.frontmatter as Record<string, unknown>;
+  const fm = collectionItem.frontmatter as Record<string, unknown>;
 
-  // Sidebar — same logic as the generic EntityDetail template, inlined so we
-  // can interleave our own custom gallery between header and citation.
+  // Sidebar — same logic as the generic EntityDetail template.
   const outbound = await Promise.all(
     SIDEBAR_GROUPS.map(async (g) => ({
       label: g.label,
       items: await resolveRefs(g.type, fm[g.key] as string[] | undefined),
     })),
   );
-  const referencing = await getReferencingItems(item.type, item.slug);
+  const referencing = await getReferencingItems(
+    collectionItem.type,
+    collectionItem.slug,
+  );
   const groups = outbound.map((g) => {
     const targetType = SIDEBAR_GROUPS.find((s) => s.label === g.label)!.type;
     const reverseHits = referencing
       .filter((r) => r.type === targetType)
-      .filter(
-        (r) => !g.items.some((existing) => existing.slug === r.slug),
-      );
+      .filter((r) => !g.items.some((existing) => existing.slug === r.slug));
     return { label: g.label, items: [...g.items, ...reverseHits] };
   });
+
+  // Group items by kind for the gallery sections
+  const byKind: Record<string, LoadedItem[]> = {};
+  for (const item of items) {
+    const t = (item.frontmatter as { documentType?: string }).documentType ?? "Document";
+    (byKind[t] ??= []).push(item);
+  }
+  const orderedKinds = [
+    ...KIND_ORDER.filter((k) => byKind[k]?.length),
+    ...Object.keys(byKind).filter((k) => !KIND_ORDER.includes(k)).sort(),
+  ];
 
   return (
     <article className="mx-auto max-w-[1320px] px-6 py-10 md:px-10 md:py-14">
@@ -81,7 +113,7 @@ export default async function EhcPage() {
             <p className="meta-line mt-3">
               {String(fm.curator ?? "")}
               {fm.dateRange ? ` · ${String(fm.dateRange)}` : ""} ·{" "}
-              {ehc.items.length} items catalogued
+              {items.length} items in the archive
             </p>
             {typeof fm.summary === "string" ? (
               <p className="mt-5 max-w-[680px] text-[18px] leading-[1.55] text-ink">
@@ -90,15 +122,11 @@ export default async function EhcPage() {
             ) : null}
           </header>
 
-          <PartnerNotice
-            ehc={ehc}
-            mirroredCount={ehc.items.filter((i) => i.mirrored).length}
-            totalCount={ehc.items.length}
-          />
+          <PartnerNotice />
 
-          {item.body.trim() ? (
+          {collectionItem.body.trim() ? (
             <div className="mt-10">
-              {renderMarkdown(item.body)}
+              {renderMarkdown(collectionItem.body)}
             </div>
           ) : null}
 
@@ -107,17 +135,21 @@ export default async function EhcPage() {
               Items in the collection
             </h2>
             <p className="mt-2 max-w-[680px] text-[14.5px] leading-snug text-ink-mute">
-              Each card links to the full record on the Portal to Texas
-              History, where the high-resolution scan and original
-              provenance metadata live.
+              Each item has its own page in this archive — every photograph
+              also appears in the {" "}
+              <Link
+                href="/documents"
+                className="border-b border-cedar/50 text-ink hover:border-cedar hover:text-cedar"
+              >
+                full Documents browse
+              </Link>
+              {" "} and on the place and person pages it&apos;s tagged to.
             </p>
 
             <div className="mt-8 space-y-12">
-              {KIND_ORDER.map((kind) => {
-                const group = byKind[kind];
-                if (!group?.length) return null;
-                return <KindSection key={kind} kind={kind} items={group} />;
-              })}
+              {orderedKinds.map((kind) => (
+                <KindSection key={kind} kind={kind} items={byKind[kind]} />
+              ))}
             </div>
           </div>
 
@@ -125,8 +157,8 @@ export default async function EhcPage() {
             title={String(fm.title)}
             type="collections"
             slug="eanes-history-center"
-            source={ehc.attribution}
-            rights="Originals © Westbank Community Library District. Digital reproductions via The Portal to Texas History, UNT Libraries. Linked, not re-hosted."
+            source={String(fm.curator ?? "")}
+            rights="Reproduction permitted by the Westbank Community Library District as the official archive home for the EHC project."
             contributor={String(fm.curator ?? "")}
           />
         </div>
@@ -142,15 +174,7 @@ export default async function EhcPage() {
   );
 }
 
-function PartnerNotice({
-  ehc,
-  mirroredCount,
-  totalCount,
-}: {
-  ehc: { partnerUrl: string; lastFetched: string };
-  mirroredCount: number;
-  totalCount: number;
-}) {
+function PartnerNotice() {
   return (
     <aside className="mt-8 border border-rule bg-limestone/40 p-5 md:p-6">
       <p className="label-archival mb-2 text-cedar">Official archive home</p>
@@ -160,30 +184,27 @@ function PartnerNotice({
         Westbank Community Library District. Original digitization was
         produced by{" "}
         <a
-          href={ehc.partnerUrl}
+          href="https://texashistory.unt.edu/explore/partners/EHC/"
           target="_blank"
           rel="noopener noreferrer"
           className="border-b border-cedar/50 text-ink hover:border-cedar hover:text-cedar"
         >
           The Portal to Texas History (UNT Libraries)
         </a>
-        ; high-resolution scans are mirrored to this site under the
-        Westbank CLD&apos;s permission.
-      </p>
-      <p className="meta-line mt-3 text-ink-mute">
-        {mirroredCount} of {totalCount} scans mirrored locally · catalogue
-        last refreshed {ehc.lastFetched}
+        . High-resolution scans are mirrored to this site and each item
+        carries its own citation and rights statement.
       </p>
     </aside>
   );
 }
 
-function KindSection({ kind, items }: { kind: ItemKind; items: EhcItem[] }) {
+function KindSection({ kind, items }: { kind: string; items: LoadedItem[] }) {
+  const isVisual = VISUAL_KINDS.has(kind);
   return (
     <section>
       <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-3">
         <h3 className="font-display text-[18px] leading-tight text-ink">
-          {KIND_LABELS[kind]}
+          {pluralize(kind, items.length)}
         </h3>
         <p className="meta-line text-ink-mute">
           {items.length} {items.length === 1 ? "item" : "items"}
@@ -191,16 +212,16 @@ function KindSection({ kind, items }: { kind: ItemKind; items: EhcItem[] }) {
       </div>
       <ul
         className={
-          kind === "photograph" || kind === "illustration"
+          isVisual
             ? "mt-6 grid grid-cols-2 gap-x-5 gap-y-9 sm:grid-cols-3 lg:grid-cols-4"
             : "mt-6 grid gap-x-6 gap-y-7 md:grid-cols-2"
         }
       >
         {items.map((item) =>
-          kind === "photograph" || kind === "illustration" ? (
-            <ImageItemCard key={item.ark} item={item} />
+          isVisual ? (
+            <ImageItemCard key={item.slug} item={item} />
           ) : (
-            <TextItemCard key={item.ark} item={item} />
+            <TextItemCard key={item.slug} item={item} />
           ),
         )}
       </ul>
@@ -208,56 +229,71 @@ function KindSection({ kind, items }: { kind: ItemKind; items: EhcItem[] }) {
   );
 }
 
-function ImageItemCard({ item }: { item: EhcItem }) {
+function ImageItemCard({ item }: { item: LoadedItem }) {
+  const f = item.frontmatter as {
+    title: string;
+    thumb?: string;
+    image?: string;
+    documentType?: string;
+  };
+  const src = f.thumb ?? f.image;
   return (
     <li>
-      <a
-        href={item.recordUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={`/documents/${item.slug}`}
         className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-oak"
       >
         <div className="aspect-[3/4] overflow-hidden border border-rule bg-limestone">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.thumbUrl}
-            alt={item.title}
-            loading="lazy"
-            className="h-full w-full object-cover grayscale transition-[filter,transform] duration-700 group-hover:grayscale-0 group-hover:scale-[1.02]"
-          />
+          {src ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={src}
+              alt={f.title}
+              loading="lazy"
+              className="h-full w-full object-cover grayscale transition-[filter,transform] duration-700 group-hover:grayscale-0 group-hover:scale-[1.02]"
+            />
+          ) : null}
         </div>
         <p className="mt-3 font-display text-[14px] leading-[1.3] text-ink transition-colors group-hover:text-oak">
-          {item.title}
+          {f.title}
         </p>
-        <p className="meta-line mt-1 text-[10.5px] text-ink-mute">
-          UNT · {item.ark}
-        </p>
-      </a>
+      </Link>
     </li>
   );
 }
 
-function TextItemCard({ item }: { item: EhcItem }) {
+function TextItemCard({ item }: { item: LoadedItem }) {
+  const f = item.frontmatter as {
+    title: string;
+    documentType?: string;
+  };
+  // Pull the first paragraph of the body as the summary.
+  const firstPara = item.body.split(/\n{2,}/)[0]?.trim() ?? "";
   return (
     <li>
-      <a
-        href={item.recordUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={`/documents/${item.slug}`}
         className="group block border-b border-rule pb-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-oak"
       >
-        <p className="label-archival text-cedar">{KIND_LABELS[item.kind]}</p>
+        <p className="label-archival text-cedar">{f.documentType}</p>
         <h4 className="mt-2 font-display text-[17px] leading-snug text-ink transition-colors group-hover:text-oak">
-          {item.title}
+          {f.title}
         </h4>
         <p className="mt-2 line-clamp-3 text-[14px] leading-snug text-ink-mute">
-          {item.summary}
+          {firstPara}
         </p>
-        <p className="meta-line mt-3 text-[10.5px]">
-          UNT · {item.ark} ·{" "}
-          <span className="text-cedar">View full record →</span>
+        <p className="meta-line mt-3 text-[10.5px] text-cedar">
+          View full record →
         </p>
-      </a>
+      </Link>
     </li>
   );
+}
+
+function pluralize(kind: string, n: number): string {
+  if (n === 1) return kind;
+  // Simple English pluralization for the kinds we use. "Family Record" → "Family Records" etc.
+  if (kind.endsWith("y") && !kind.endsWith("ay")) return kind.slice(0, -1) + "ies";
+  if (kind.endsWith("s")) return kind;
+  return kind + "s";
 }

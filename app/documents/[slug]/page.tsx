@@ -37,6 +37,8 @@ export default async function DocumentPage({
     creator?: string;
     source?: string;
     rights?: string;
+    image?: string;
+    externalRecordUrl?: string;
   };
 
   return (
@@ -52,6 +54,48 @@ export default async function DocumentPage({
         f.source,
         f.rights ? `Rights: ${f.rights}` : null,
       ]}
+      extra={
+        f.image ? (
+          <DocumentImage
+            src={f.image}
+            externalUrl={f.externalRecordUrl}
+            alt={(item.frontmatter as { title?: string }).title ?? slug}
+          />
+        ) : null
+      }
     />
+  );
+}
+
+function DocumentImage({
+  src,
+  externalUrl,
+  alt,
+}: {
+  src: string;
+  externalUrl?: string;
+  alt: string;
+}) {
+  return (
+    <figure className="mt-4 border border-rule bg-limestone/40">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        className="block max-h-[700px] w-full object-contain"
+      />
+      {externalUrl ? (
+        <figcaption className="meta-line border-t border-rule px-4 py-3 text-ink-mute">
+          <a
+            href={externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border-b border-cedar/50 text-ink hover:border-cedar hover:text-cedar"
+          >
+            View the original record on the Portal to Texas History →
+          </a>
+        </figcaption>
+      ) : null}
+    </figure>
   );
 }

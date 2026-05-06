@@ -11,11 +11,10 @@
 import { CONTENT_TYPES, TYPE_LABEL, type ContentType } from "./schemas";
 import { loadAllContent, type LoadedItem } from "./content";
 import { getEpisodes } from "./buzzsprout";
-import { loadEhcCollection, KIND_LABELS, type ItemKind } from "./ehc";
 
 export interface SearchDoc {
   id: string;
-  type: ContentType | "audio-podcast" | "ehc-item";
+  type: ContentType | "audio-podcast";
   typeLabel: string;
   title: string;
   href: string;
@@ -39,26 +38,9 @@ export async function buildSearchIndex(): Promise<SearchDoc[]> {
     }
   }
 
-  // EHC partner items — searchable; clicks go off-site to UNT
-  try {
-    const ehc = await loadEhcCollection();
-    for (const item of ehc.items) {
-      docs.push({
-        id: `ehc-item/${item.ark}`,
-        type: "ehc-item",
-        typeLabel: `${KIND_LABELS[item.kind as ItemKind] ?? "Item"} (EHC)`,
-        title: item.title,
-        href: item.recordUrl,
-        summary: item.summary,
-        body: item.tags.join(" "),
-        tags: item.tags.join(" "),
-        subtitle: `Eanes History Center · UNT ${item.ark}`,
-        date: "",
-      });
-    }
-  } catch (err) {
-    console.warn("[search] could not load EHC items for index:", err);
-  }
+  // (EHC items used to be indexed from the JSON here; now they live as
+  // first-class /content/documents MDX files and are picked up by the
+  // CONTENT_TYPES loop above. No special handling needed.)
 
   // Live podcast episodes — searchable by title and description
   try {
