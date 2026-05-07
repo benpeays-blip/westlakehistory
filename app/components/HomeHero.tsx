@@ -14,20 +14,23 @@ export function HomeHero() {
         <div className="grid items-end gap-12 lg:grid-cols-[1fr_auto] lg:gap-20">
           <div>
             <p className="label-archival mb-5 text-cedar">
-              A digital archive of West Lake Hills, Texas
+              A community archive
             </p>
             <h1
               className="font-display font-normal leading-[0.98] tracking-[-0.01em] text-ink"
               style={{ fontSize: "clamp(48px, 7.6vw, 104px)" }}
             >
-              The stories of <em className="italic">Westlake</em>,
-              <br />
-              told by the people who built it.
+              The history of <em className="italic">West Lake Hills</em>, Texas.
             </h1>
-            <p className="mt-7 max-w-[640px] text-[18px] leading-[1.55] text-ink-mute md:text-[19px]">
-              People. Places. Events. Memories.
-              <br className="hidden sm:block" />
-              {" "}Preserved for generations.
+            <p className="mt-7 max-w-[560px] text-[17px] leading-[1.55] text-ink-mute md:text-[18px]">
+              West Lake Hills, Rollingwood, and the broader Eanes-area
+              community.{" "}
+              <a
+                href="/contribute"
+                className="border-b border-cedar/50 text-ink hover:border-cedar hover:text-cedar"
+              >
+                Contribute a story or photograph →
+              </a>
             </p>
 
             <form

@@ -1,19 +1,21 @@
+import { ContributeForm } from "@/app/components/ContributeForm";
+
 export const metadata = {
   title: "Contribute — Westlake History",
   description:
-    "Share photographs, documents, memories, and recordings with the Westlake, Texas community archive.",
+    "Share photographs, documents, memories, recordings, and videos with the Westlake, Texas community archive.",
 };
 
 const STEPS = [
   {
     n: "1",
-    title: "Contact us",
-    body: "Let us know what you would like to share — a photograph, a document, a memory, a recording. A short note is all we need to begin.",
+    title: "Send it in",
+    body: "Use the form below to tell us what you'd like to share. A photograph, a document, a memory, a recording — even a few sentences are a useful start.",
   },
   {
     n: "2",
     title: "We review",
-    body: "Our team will review the material with care, ask any clarifying questions, and propose how it might fit the archive.",
+    body: "An archive curator reviews every submission, asks any clarifying questions, and proposes how it might fit alongside the existing material.",
   },
   {
     n: "3",
@@ -23,7 +25,7 @@ const STEPS = [
   {
     n: "4",
     title: "It becomes part of the archive",
-    body: "Once published, your contribution becomes part of the permanent, public archive — preserved for the next hundred years.",
+    body: "Once published, your contribution becomes part of the permanent, public archive — preserved, cross-linked to related people and places, and citable for the next hundred years.",
   },
 ];
 
@@ -34,8 +36,10 @@ export default function ContributePage() {
         Contribute to Westlake History
       </h1>
       <p className="mt-5 max-w-[640px] text-[17px] leading-[1.6] text-ink">
-        Our archive grows through the generosity of our community. Share your
-        photographs, documents, memories, and recordings.
+        Our archive grows through the generosity of our community. If you
+        have photographs, documents, memories, recordings, or videos from
+        West Lake Hills, Rollingwood, the Eanes-area, or any of the
+        families and institutions that built it, we want to bring them in.
       </p>
 
       <ol className="mt-12 space-y-10">
@@ -54,18 +58,7 @@ export default function ContributePage() {
         ))}
       </ol>
 
-      <div className="mt-14 border-t border-rule pt-10">
-        <a
-          href="mailto:contribute@westlakehistory.com"
-          className="inline-block bg-oak px-7 py-3 text-[15px] font-medium text-paper transition-colors hover:bg-oak-deep"
-        >
-          Get started
-        </a>
-        <p className="meta-line mt-5 text-ink-mute">
-          A short, friendly email is the best way to begin. We respond
-          personally — never with an automated reply.
-        </p>
-      </div>
+      <ContributeForm />
     </section>
   );
 }
