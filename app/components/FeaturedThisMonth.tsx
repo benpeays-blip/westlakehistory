@@ -7,6 +7,8 @@ interface FeaturedItem {
   excerpt: string;
   href: string;
   thumb: ThumbKind;
+  /** Real image src (mirrored EHC scan, photograph, etc.). When set, displaces the SVG thumb. */
+  imageSrc?: string;
 }
 
 type ThumbKind = "story" | "audio" | "place" | "map" | "document" | "collection";
@@ -89,6 +91,8 @@ export function FeaturedThisMonth({
       documentType?: string;
       date?: string;
       summary?: string;
+      thumb?: string;
+      image?: string;
     };
     const label = (f.documentType ?? "Document").toUpperCase();
     items.push({
@@ -97,6 +101,7 @@ export function FeaturedThisMonth({
       excerpt: f.summary ?? f.date ?? "",
       href: `/documents/${document.slug}`,
       thumb: "document",
+      imageSrc: f.thumb ?? f.image,
     });
   }
 
@@ -145,7 +150,17 @@ export function FeaturedThisMonth({
                 className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-oak"
               >
                 <div className="aspect-[4/5] overflow-hidden border border-rule bg-limestone">
-                  <ThumbArt kind={item.thumb} />
+                  {item.imageSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.imageSrc}
+                      alt={item.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover grayscale transition-[filter,transform] duration-700 group-hover:grayscale-0 group-hover:scale-[1.02]"
+                    />
+                  ) : (
+                    <ThumbArt kind={item.thumb} />
+                  )}
                 </div>
                 <p className="label-archival mt-4">{item.type}</p>
                 <h3 className="mt-2 font-display text-[17px] leading-[1.25] text-ink transition-colors group-hover:text-oak">

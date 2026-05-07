@@ -51,6 +51,9 @@ const PLACE_PATTERNS = [
   { rx: /\blake austin\b/i, slug: "lake-austin" },
   { rx: /\btom miller dam\b/i, slug: "tom-miller-dam" },
   { rx: /\bdavenport (ranch|tract|family)\b/i, slug: "davenport-ranch" },
+  { rx: /\beanes[-\s]marshall cemet[ae]ry\b/i, slug: "eanes-marshall-cemetery" },
+  { rx: /\bsmith creek\b/i, slug: "smith-creek" },
+  { rx: /\bwestlake hills presbyterian church\b/i, slug: "westlake-hills-presbyterian-church" },
 ];
 
 const PERSON_PATTERNS = [
@@ -61,6 +64,10 @@ const PERSON_PATTERNS = [
   { rx: /\b(james|buck) ('?buck'? )?davenport\b/i, slug: "james-buck-davenport" },
   { rx: /\bbruce marshall\b/i, slug: "bruce-marshall" },
   { rx: /\b(mary (ellen )?(mowinckle|mowinkle)( johnson)?|mowinckle)\b/i, slug: "mary-mowinckle-johnson" },
+  { rx: /\bdorothy depwe\b/i, slug: "dorothy-depwe" },
+  { rx: /\bjames short\b/i, slug: "james-short" },
+  { rx: /\b(frank a\.|frank) johnson\b|\bjohnson house\b/i, slug: "frank-johnson" },
+  { rx: /\bgertrude johnson\b|\bmrs\. frank a\. johnson\b/i, slug: "gertrude-johnson" },
 ];
 
 const STORY_PATTERNS = [
