@@ -24,10 +24,16 @@ const UNT_BASE = "https://texashistory.unt.edu/ark:/67531";
 const UA =
   "WestlakeHistoryArchive/1.0 (+https://westlakehistory.com; mirroring under permission)";
 
-export async function fetchOcrForArk(ark) {
-  // First request page 1 to discover total page count from the title tag.
+export async function fetchOcrForArk(ark, options = {}) {
+  const { maxPages = Infinity } = options;
+  // Discover total page count two ways:
+  //   - Articles: title says "Page 3 of 4"
+  //   - Books: title shows the page name ("Front Cover"), no count.
+  //     Fall back to scanning the navigation list for the highest m1/N/ link.
   const firstHtml = await fetchHtml(`${UNT_BASE}/${ark}/m1/1/ocr`);
-  const totalPages = extractPageCount(firstHtml) ?? 1;
+  const detectedPages =
+    extractPageCount(firstHtml) ?? extractMaxPageFromNav(firstHtml) ?? 1;
+  const totalPages = Math.min(detectedPages, maxPages);
   const pages = [extractOcrText(firstHtml)];
 
   for (let p = 2; p <= totalPages; p++) {
@@ -40,6 +46,8 @@ export async function fetchOcrForArk(ark) {
     ark,
     pages,
     totalPages,
+    detectedPages,
+    truncated: detectedPages > totalPages,
     /** Single concatenated string with explicit page breaks. */
     text: pages
       .map((t, i) => `--- Page ${i + 1} of ${totalPages} ---\n\n${t.trim()}`)
@@ -57,6 +65,14 @@ function extractPageCount(html) {
   // <title>... - Page 1 of 4 - OCR Text ...</title>
   const m = html.match(/Page\s+\d+\s+of\s+(\d+)/);
   return m ? Number(m[1]) : null;
+}
+
+function extractMaxPageFromNav(html) {
+  // Books and other paginated items expose a navigation list of all pages
+  // as m1/<N>/ links — take the maximum N seen.
+  const matches = [...html.matchAll(/m1\/(\d+)\//g)];
+  if (!matches.length) return null;
+  return matches.reduce((max, m) => Math.max(max, Number(m[1])), 0);
 }
 
 function extractOcrText(html) {

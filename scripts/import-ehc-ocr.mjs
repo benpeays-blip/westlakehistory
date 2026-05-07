@@ -43,6 +43,19 @@ const OCR_KINDS = new Set([
   "family-record",
 ]);
 
+// ARKs that are physically books — their navigation has 80–130 pages and
+// the OCR fetcher needs to walk all of them. We cap at MAX_PAGES_FOR_BOOKS
+// to keep the rendered MDX manageable; the full text always remains
+// linkable on UNT.
+const BOOK_ARKS = new Set([
+  "metapth769391", // Eanes: Portrait of a Community
+  "metapth769666", // Eanes: A History of the School and Community
+  "metapth821227", // Texas Gulf Historical and Biographical Record
+  "metapth821306", // Frontier Times Vol. 1 No. 3
+  "metapth821421", // Echoes from the Past
+]);
+const MAX_PAGES_FOR_BOOKS = 80;
+
 const STUB_PREFIX_RX = /^Original record:/m;
 
 const json = JSON.parse(await readFile(ITEMS_PATH, "utf8"));
@@ -85,12 +98,14 @@ for (const item of json.items) {
   // Retry up to 3 times with exponential backoff if UNT throttles us
   let result = null;
   let lastErr = null;
+  const isBook = BOOK_ARKS.has(item.ark);
+  const maxPages = isBook ? MAX_PAGES_FOR_BOOKS : Infinity;
   for (let attempt = 1; attempt <= 3 && !result; attempt++) {
     try {
       process.stdout.write(
-        `ocr   ${item.ark}${attempt > 1 ? ` (try ${attempt})` : ""}…`,
+        `ocr   ${item.ark}${isBook ? " (book)" : ""}${attempt > 1 ? ` (try ${attempt})` : ""}…`,
       );
-      result = await fetchOcrForArk(item.ark);
+      result = await fetchOcrForArk(item.ark, { maxPages });
     } catch (err) {
       lastErr = err;
       if (err.message.includes("404")) break; // not retryable
@@ -134,18 +149,30 @@ if (failed > 0) process.exit(1);
 function formatBody(result, item) {
   const blocks = [];
   blocks.push(item.summary || "");
-  blocks.push(
-    "## Transcribed text\n\n" +
-      "_The following text was extracted via OCR from the digitized scan held by The Portal to Texas History (UNT Libraries). OCR can introduce errors, especially on handwritten material; the canonical record links to the original scan._",
-  );
+  const ocrNote =
+    "_The following text was extracted via OCR from the digitized scan held by The Portal to Texas History (UNT Libraries). OCR can introduce errors, especially on handwritten material; the canonical record links to the original scan._";
+  if (result.truncated) {
+    blocks.push(
+      `## Transcribed text (first ${result.totalPages} of ${result.detectedPages} pages)\n\n${ocrNote}`,
+    );
+  } else {
+    blocks.push(`## Transcribed text\n\n${ocrNote}`);
+  }
   for (let i = 0; i < result.pages.length; i++) {
     const text = result.pages[i].trim();
     if (!text || text.length < 30) continue;
     if (result.totalPages > 1) {
-      blocks.push(`### Page ${i + 1} of ${result.totalPages}\n\n${text}`);
+      blocks.push(
+        `### Page ${i + 1}${result.detectedPages > 1 ? ` of ${result.detectedPages}` : ""}\n\n${text}`,
+      );
     } else {
       blocks.push(text);
     }
+  }
+  if (result.truncated) {
+    blocks.push(
+      `_(${result.detectedPages - result.totalPages} additional pages omitted from this transcript — view the full text on the Portal to Texas History.)_`,
+    );
   }
   blocks.push(
     `Original record: [${item.ark} on the Portal to Texas History](https://texashistory.unt.edu/ark:/67531/${item.ark}/).`,
